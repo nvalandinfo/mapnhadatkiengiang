@@ -3,174 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NVALAND - CHUYÊN NGHIỆP</title>
+    <title>NVALAND - HỆ THỐNG BĐS KIÊN GIANG</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
     
     <style>
-        :root { --gold: #d4af37; --dark: #000033; --orange: #f97316; }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; overflow: hidden; }
+        :root { --navi: #000080; --gold: #d4af37; --orange: #f97316; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Roboto, sans-serif; overflow: hidden; }
         #map { width: 100%; height: 100vh; z-index: 1; }
 
-        /* LOGO BO VIỀN VÀNG ÁNH KIM (SỬA LỖI HIỂN THỊ) */
-        .brand-box {
-            position: absolute; top: 20px; left: 20px; z-index: 1001;
-            padding: 5px; background: white; border-radius: 12px;
-            border: 2px solid var(--gold); box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        /* LOGO CHỮ VÀNG NỀN NAVI */
+        .brand-header {
+            position: absolute; top: 15px; left: 15px; z-index: 1001;
+            background: var(--navi); color: var(--gold);
+            padding: 8px 15px; border-radius: 8px;
+            font-weight: 900; font-size: 18px; letter-spacing: 1px;
+            border: 1px solid var(--gold); box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center;
         }
-        .brand-box img { display: block; width: 80px; height: auto; border-radius: 8px; }
 
-        /* THANH TÌM KIẾM AI */
-        .search-wrapper {
-            position: absolute; top: 20px; left: 130px; right: 20px; z-index: 1001;
-            max-width: 400px;
+        /* Ô TÌM KIẾM NHỎ GỌN BUNG NỞ */
+        .search-container {
+            position: absolute; top: 15px; right: 70px; z-index: 1001;
+            display: flex; flex-direction: column; align-items: flex-end;
         }
-        .ai-input-group {
-            background: white; border-radius: 30px; display: flex; align-items: center;
-            padding: 10px 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); border: 1px solid var(--gold);
+        .search-trigger {
+            background: #ffc107; border: none; padding: 10px 20px;
+            border-radius: 50px; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 8px;
         }
-        .ai-input-group input { border: none; width: 100%; outline: none; font-size: 15px; }
+        /* BẢNG LỌC CHI TIẾT (ẨN MẶC ĐỊNH) */
+        .search-panel {
+            display: none; background: white; width: 320px; margin-top: 10px;
+            border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 1px solid #ddd;
+        }
+        .search-panel.active { display: block; }
+        .filter-group { margin-bottom: 12px; }
+        .filter-group label { display: block; font-size: 12px; font-weight: bold; margin-bottom: 5px; color: #555; }
+        .filter-group input, .filter-group select {
+            width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
+        }
+        .btn-apply {
+            width: 100%; background: #007bff; color: white; border: none;
+            padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;
+        }
 
-        /* BẢNG THÔNG TIN TRƯỢT TỪ PHẢI SANG (SIDE PANEL) */
+        /* BẢNG THÔNG TIN TRƯỢT (SIDE PANEL) */
         #side-panel {
-            position: fixed; top: 0; right: -100%; width: 350px; height: 100%;
+            position: fixed; top: 0; right: -100%; width: 360px; height: 100%;
             background: white; z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: -5px 0 25px rgba(0,0,0,0.2); display: flex; flex-direction: column;
+            box-shadow: -5px 0 25px rgba(0,0,0,0.15); display: flex; flex-direction: column;
         }
         #side-panel.active { right: 0; }
-        .panel-close { 
-            position: absolute; top: 15px; left: -40px; background: white; 
-            width: 40px; height: 40px; border-radius: 10px 0 0 10px; 
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-            box-shadow: -2px 0 10px rgba(0,0,0,0.1); font-size: 20px;
-        }
+        .panel-close { position: absolute; top: 15px; right: 15px; font-size: 24px; cursor: pointer; z-index: 10; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         .panel-content { overflow-y: auto; flex: 1; }
-        .panel-img { width: 100%; height: 200px; object-fit: cover; }
-        .panel-body { padding: 20px; }
-        .tag-id { background: #eee; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .main-img { width: 100%; height: 240px; object-fit: cover; }
+        .content-body { padding: 20px; }
+        .price-big { color: var(--orange); font-size: 24px; font-weight: bold; margin: 10px 0; }
         
-        /* CỤM NÚT ĐIỀU HƯỚNG CHUYÊN NGHIỆP */
-        .action-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-        .btn { 
-            padding: 12px; border-radius: 8px; text-align: center; 
-            text-decoration: none; font-weight: bold; font-size: 14px;
-            display: flex; align-items: center; justify-content: center; gap: 8px;
+        /* NÚT HÀNH ĐỘNG */
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+        .btn-action {
+            padding: 12px; border-radius: 8px; text-decoration: none; font-weight: bold;
+            display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 14px;
         }
         .btn-call { background: var(--orange); color: white; grid-column: span 2; }
-        .btn-dir { background: #2563eb; color: white; }
+        .btn-map { background: #28a745; color: white; }
         .btn-zalo { background: #0068ff; color: white; }
 
-        /* NÚT ZOOM (ĐẨY XUỐNG DƯỚI) */
-        .leaflet-right .leaflet-control-zoom { margin-bottom: 30px !important; margin-right: 15px !important; border: none !important; }
-        .leaflet-control-zoom-in, .leaflet-control-zoom-out { 
-            background: white !important; width: 45px !important; height: 45px !important; 
-            line-height: 45px !important; border-radius: 12px !important; color: var(--dark) !important;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important; margin-top: 5px !important;
-        }
+        /* NÚT ZOOM DƯỚI GÓC PHẢI */
+        .leaflet-right .leaflet-control-zoom { margin-bottom: 25px !important; margin-right: 15px !important; }
 
-        /* GHIM VÀ GIÁ */
-        .price-tag {
+        /* LABEL GIÁ TRÊN BẢN ĐỒ */
+        .price-marker {
+            background: var(--orange); color: white; font-weight: bold; padding: 2px 8px;
+            border-radius: 4px; border: 2px solid white; font-size: 12px; white-space: nowrap;
             position: absolute; top: -35px; left: 50%; transform: translateX(-50%);
-            background: var(--orange); color: white; font-weight: bold;
-            padding: 3px 10px; border-radius: 6px; font-size: 12px;
-            border: 2px solid white; box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
-        .pin-icon { width: 35px; height: 35px; background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center; background-size: contain; }
+        .pin { width: 30px; height: 30px; background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center; background-size: contain; }
 
-        @media (max-width: 600px) { #side-panel { width: 85%; } }
+        @media (max-width: 600px) { #side-panel { width: 100%; } .search-panel { width: 280px; } }
     </style>
 </head>
 <body>
 
-<div class="brand-box">
-    <img src="https://raw.githubusercontent.com/nvalandinfo/mapnhadatkiengiang/main/4557771479993397999.jpg" alt="NVALAND">
-</div>
+<div class="brand-header">NVALAND</div>
 
-<div class="search-wrapper">
-    <div class="ai-input-group">
-        <input type="text" id="aiInput" placeholder="Tìm giá, mã số, vị trí..." oninput="aiSearch()">
-        <span>🔍</span>
+<div class="search-container">
+    <button class="search-trigger" onclick="toggleSearch()">
+        🔍 Tìm kiếm BĐS
+    </button>
+    <div class="search-panel" id="searchPanel">
+        <div class="filter-group">
+            <label>MÃ SỐ BÀI VIẾT</label>
+            <input type="text" id="findId" placeholder="VD: RG-001...">
+        </div>
+        <div class="filter-group">
+            <label>ĐỊA PHƯƠNG/ĐỊA CHỈ</label>
+            <input type="text" id="findLoc" placeholder="Rạch Giá, Kiên Hải...">
+        </div>
+        <div class="filter-group">
+            <label>MỨC GIÁ</label>
+            <select id="findPrice">
+                <option value="">-- Tất cả mức giá --</option>
+                <option value="1">Dưới 2 tỷ</option>
+                <option value="2">2 tỷ - 5 tỷ</option>
+                <option value="3">Trên 5 tỷ</option>
+            </select>
+        </div>
+        <button class="btn-apply" onclick="executeSearch()">ÁP DỤNG LỌC</button>
     </div>
 </div>
 
 <div id="side-panel">
     <div class="panel-close" onclick="closePanel()">✕</div>
-    <div class="panel-content" id="panelContent">
-        </div>
+    <div class="panel-content" id="panelBody"></div>
 </div>
 
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.js"></script>
 
 <script>
-    const bdsData = [
-        { 
-            id: "RG-001", 
-            ten: "Đất nền khu lấn biển Tây Bắc", 
-            gia: "4.5 tỷ", 
-            toaDo: [10.012, 105.080], 
-            anh: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600",
-            mota: "Diện tích 5x20m, hướng biển, pháp lý hoàn chỉnh.",
-            sdt: "0901234567"
-        },
-        { 
-            id: "RG-002", 
-            ten: "Nhà phố Phú Cường P. An Hòa", 
-            gia: "3.2 tỷ", 
-            toaDo: [10.008, 105.105], 
-            anh: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600",
-            mota: "Gần bệnh viện đa khoa, đường rộng 12m.",
-            sdt: "0907654321"
-        }
+    const dataBDS = [
+        { id: "RG-001", ten: "Lô đất mặt tiền Lạc Hồng", gia: "4.8 tỷ", val: 2, toaDo: [10.010, 105.085], anh: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=600", mota: "Diện tích 100m2, gần trung tâm thương mại Rạch Giá.", sdt: "0901234567" },
+        { id: "RG-002", ten: "Căn hộ cao cấp Phú Cường", gia: "2.5 tỷ", val: 2, toaDo: [10.005, 105.095], anh: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600", mota: "View biển cực đẹp, nội thất hiện đại.", sdt: "0908888999" }
     ];
 
-    // Khởi tạo bản đồ tại Rạch Giá
     var map = L.map('map', { zoomControl: true }).setView([10.012, 105.080], 14);
-    map.zoomControl.setPosition('bottomright'); // Đưa nút zoom xuống dưới
-
+    map.zoomControl.setPosition('bottomright');
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
 
     var clusters = L.markerClusterGroup();
-    var markersList = {};
+    var markerMap = {};
 
-    bdsData.forEach(item => {
+    dataBDS.forEach(item => {
         var icon = L.divIcon({
-            className: 'custom-marker',
-            html: `<div class="price-tag">${item.gia}</div><div class="pin-icon"></div>`,
-            iconSize: [35, 35], iconAnchor: [17, 35]
+            className: 'price-marker-wrap',
+            html: `<div class="price-marker">${item.gia}</div><div class="pin"></div>`,
+            iconSize: [30, 30], iconAnchor: [15, 30]
         });
 
         var marker = L.marker(item.toaDo, { icon: icon });
-        
-        marker.on('click', function() {
-            showDetails(item);
-        });
-
+        marker.on('click', () => openDetail(item));
         clusters.addLayer(marker);
-        markersList[item.id] = marker;
+        markerMap[item.id] = marker;
     });
     map.addLayer(clusters);
 
-    function showDetails(item) {
+    function toggleSearch() {
+        document.getElementById('searchPanel').classList.toggle('active');
+    }
+
+    function openDetail(item) {
         const panel = document.getElementById('side-panel');
-        const content = document.getElementById('panelContent');
-        
-        content.innerHTML = `
-            <img src="${item.anh}" class="panel-img">
-            <div class="panel-body">
-                <span class="tag-id">Mã số: ${item.id}</span>
-                <h2 style="margin:15px 0 5px; color:var(--dark)">${item.ten}</h2>
-                <div style="font-size: 24px; color: var(--orange); font-weight: bold; margin-bottom: 15px;">${item.gia}</div>
-                <hr border="0" style="border-top:1px solid #eee">
-                <p style="color:#666; line-height:1.6"><b>Thông tin:</b> ${item.mota}</p>
-                
-                <div class="action-group">
-                    <a href="tel:${item.sdt}" class="btn btn-call">📞 GỌI NGAY: ${item.sdt}</a>
-                    <a href="https://www.google.com/maps/dir/?api=1&destination=${item.toaDo[0]},${item.toaDo[1]}" target="_blank" class="btn btn-dir">📍 CHỈ ĐƯỜNG</a>
-                    <a href="https://zalo.me/${item.sdt}" target="_blank" class="btn btn-zalo">💬 CHAT ZALO</a>
+        document.getElementById('panelBody').innerHTML = `
+            <img src="${item.anh}" class="main-img">
+            <div class="content-body">
+                <span style="color:#888; font-size:12px; font-weight:bold;">MÃ SỐ: ${item.id}</span>
+                <h2 style="margin:5px 0; color:var(--navi)">${item.ten}</h2>
+                <div class="price-big">${item.gia}</div>
+                <p style="color:#555; line-height:1.6; font-size:14px;">${item.mota}</p>
+                <div class="action-grid">
+                    <a href="tel:${item.sdt}" class="btn-action btn-call">📞 GỌI TƯ VẤN: ${item.sdt}</a>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=${item.toaDo[0]},${item.toaDo[1]}" target="_blank" class="btn-action btn-map">📍 CHỈ ĐƯỜNG</a>
+                    <a href="https://zalo.me/${item.sdt}" target="_blank" class="btn-action btn-zalo">💬 CHAT ZALO</a>
                 </div>
             </div>
         `;
@@ -178,18 +178,16 @@
         map.flyTo(item.toaDo, 17);
     }
 
-    function closePanel() {
-        document.getElementById('side-panel').classList.remove('active');
-    }
+    function closePanel() { document.getElementById('side-panel').classList.remove('active'); }
 
-    function aiSearch() {
-        const q = document.getElementById('aiInput').value.toLowerCase();
-        const results = bdsData.filter(i => i.ten.toLowerCase().includes(q) || i.id.toLowerCase().includes(q) || i.gia.toLowerCase().includes(q));
-        
-        if(q.length > 0 && results.length > 0) {
-            // Tự động bay đến kết quả đầu tiên nếu khớp hoàn toàn mã số
-            const exactMatch = results.find(i => i.id.toLowerCase() === q);
-            if(exactMatch) showDetails(exactMatch);
+    function executeSearch() {
+        const id = document.getElementById('findId').value.toUpperCase();
+        if(markerMap[id]) {
+            const item = dataBDS.find(i => i.id === id);
+            openDetail(item);
+            toggleSearch();
+        } else {
+            alert("Không tìm thấy mã số này!");
         }
     }
 </script>
