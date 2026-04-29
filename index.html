@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NVALAND MAP PRO</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#f1f5f9;color:#111}
+header{background:#fff;padding:16px;border-bottom:1px solid #ddd;position:sticky;top:0;z-index:1000}
+.wrap{max-width:1400px;margin:auto}
+.row{display:grid;grid-template-columns:380px 1fr;gap:16px;padding:16px}
+.sidebar{height: 85vh; overflow-y: auto; padding-right: 8px;}
+/* Làm đẹp thanh cuộn */
+.sidebar::-webkit-scrollbar {width: 6px;}
+.sidebar::-webkit-scrollbar-thumb {background: #cbd5e1; border-radius: 10px;}
+
+.card{background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:16px;cursor:pointer;transition:0.3s}
+.card:hover{transform: translateY(-4px); box-shadow: 0 10px 15px rgba(0,0,0,0.1)}
+.card img{width:100%;height:180px;object-fit:cover}
+.card .p{padding:14px}
+.price{color:#ea580c;font-weight:bold; font-size: 1.2rem}
+/* Khu vực bản đồ */
+#map{background:#ddd;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08);height:85vh; width:100%}
+input{padding:10px;border:1px solid #ccc;border-radius:10px;width:60%;outline:none}
+button{padding:10px 14px;border:0;border-radius:10px;background:#f97316;color:#fff;cursor:pointer;font-weight:bold}
+@media(max-width:900px){.row{grid-template-columns:1fr} .sidebar{height:auto} #map{height:400px}}
+</style>
+</head>
+<body>
+
+<header>
+    <div class='wrap'>
+        <h2 style='margin:0; color:#f97316'>NVALAND MAP PRO</h2>
+        <div style='margin-top:10px'>
+            <input id="searchInput" placeholder='Tìm khu vực, đường, dự án...'> 
+            <button onclick="searchLocation()">Tìm kiếm</button>
+        </div>
+    </div>
+</header>
+
+<div class='wrap row'>
+    <div class="sidebar">
+        <div class='card' onclick="flyToLocation(10.012, 105.080, 'Nhà phố Phú Cường', '3.2 tỷ')">
+            <img src='https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=1200'>
+            <div class='p'><h3>Nhà phố Phú Cường</h3><div class='price'>3.2 tỷ</div><small>5x20 • Rạch Giá</small></div>
+        </div>
+        
+        <div class='card' onclick="flyToLocation(10.005, 105.075, 'Đất nền Tây Bắc', '1.8 tỷ')">
+            <img src='https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200'>
+            <div class='p'><h3>Đất nền Tây Bắc</h3><div class='price'>1.8 tỷ</div><small>100m2 • Rạch Giá</small></div>
+        </div>
+
+        <div class='card' onclick="flyToLocation(10.020, 105.090, 'MT Nguyễn Trung Trực', '6.5 tỷ')">
+            <img src='https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=1200'>
+            <div class='p'><h3>MT Nguyễn Trung Trực</h3><div class='price'>6.5 tỷ</div><small>5x25 • Rạch Giá</small></div>
+        </div>
+    </div>
+
+    <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// 1. Khởi tạo bản đồ tại Rạch Giá (Vĩ độ: 10.012, Kinh độ: 105.080)
+var map = L.map('map').setView([10.012, 105.080], 14);
+
+// 2. Thiết lập các chế độ bản đồ (Lớp nền)
+var streetMap = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: 'NVALAND'
+}).addTo(map);
+
+var satelliteMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Esri World Imagery'
+});
+
+// Nút chuyển đổi Vệ tinh / Đường phố ở góc phải
+var baseMaps = {
+    "Đường phố": streetMap,
+    "Vệ tinh": satelliteMap
+};
+L.control.layers(baseMaps).addTo(map);
+
+// 3. Hàm xử lý khi click vào Card bên trái
+function flyToLocation(lat, lng, title, price) {
+    // Bay đến vị trí
+    map.flyTo([lat, lng], 17, { duration: 1.5 });
+    
+    // Hiện bảng thông tin tại vị trí đó
+    L.popup()
+        .setLatLng([lat, lng])
+        .setContent("<b>" + title + "</b><br><span style='color:orange'>" + price + "</span>")
+        .openOn(map);
+}
+
+// 4. Hàm tìm kiếm (Gợi ý hướng phát triển)
+function searchLocation() {
+    let input = document.getElementById('searchInput').value;
+    alert("Hệ thống đang tìm kiếm: " + input);
+}
+</script>
+</body>
+</html>
