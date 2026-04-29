@@ -34,7 +34,7 @@
         .btn-ui { background: var(--navy); color: var(--gold); border: 1.5px solid var(--gold); padding: 10px 18px; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 12px; }
         .btn-post { background: #28a745; color: white; border-color: #ffffff; }
 
-        /* BẢNG BỘ LỌC CHI TIẾT */
+        /* BẢNG BỘ LỌC */
         .filter-panel {
             display: none; background: white; border-radius: 12px; padding: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-top: 4px solid var(--gold);
@@ -43,24 +43,27 @@
         .filter-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .filter-grid select { padding: 8px; border-radius: 6px; border: 1px solid #ddd; font-size: 13px; outline: none; }
 
-        /* GHIM ĐỎ MẶC ĐỊNH */
+        /* GHIM ĐỎ */
         .price-pin { display: flex; flex-direction: column; align-items: center; }
-        .pin-label { background: var(--navy); color: var(--gold); padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; border: 1px solid var(--gold); }
+        .pin-label { background: var(--navy); color: var(--gold); padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; border: 1px solid var(--gold); margin-bottom: 2px; }
         .pin-drop {
             width: 30px; height: 30px;
             background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center;
-            background-size: contain; filter: hue-rotate(140deg) brightness(0.8) saturate(5);
+            background-size: contain; filter: hue-rotate(140deg) brightness(0.8) saturate(5); /* Chỉnh thành màu đỏ */
         }
 
-        /* TÙY CHỈNH CỤM (CLUSTER) THEO MÀU */
-        .marker-cluster-small { background-color: rgba(110, 204, 57, 0.6); }
+        /* CLUSTER COLORS (NHƯ HÌNH MINH HỌA) */
+        .marker-cluster-small { background-color: rgba(110, 204, 57, 0.6); } /* Xanh lá < 10 */
         .marker-cluster-small div { background-color: rgba(110, 204, 57, 1); }
-        .marker-cluster-medium { background-color: rgba(241, 211, 87, 0.6); }
+        
+        .marker-cluster-medium { background-color: rgba(241, 211, 87, 0.6); } /* Vàng 10 - 100 */
         .marker-cluster-medium div { background-color: rgba(241, 211, 87, 1); }
-        .marker-cluster-large { background-color: rgba(253, 156, 115, 0.6); }
+        
+        .marker-cluster-large { background-color: rgba(253, 156, 115, 0.6); } /* Cam > 100 */
         .marker-cluster-large div { background-color: rgba(253, 156, 115, 1); }
+
         .marker-cluster { background-clip: padding-box; border-radius: 20px; }
-        .marker-cluster div { width: 30px; height: 30px; margin-left: 5px; margin-top: 5px; text-align: center; border-radius: 15px; font: 12px Arial; font-weight: bold; line-height: 30px; }
+        .marker-cluster div { width: 30px; height: 30px; margin-left: 5px; margin-top: 5px; text-align: center; border-radius: 15px; font: 12px Arial; font-weight: bold; line-height: 30px; color: #000; }
 
         /* SIDE PANEL */
         #side-panel { position: fixed; top: 0; right: -100%; width: 380px; height: 100%; background: white; z-index: 2000; transition: 0.4s ease; box-shadow: -10px 0 30px rgba(0,0,0,0.2); }
@@ -77,21 +80,21 @@
 <div class="main-controls">
     <div class="search-row">
         <div class="search-box">
-            <input type="text" id="inputSearch" placeholder="Mã (RG01...), tên, giá...">
+            <input type="text" id="inputSearch" placeholder="Tìm theo Mã (RG01-RG30), tên...">
             <button onclick="executeSearch()" style="background:none; border:none; cursor:pointer;">🔍</button>
         </div>
         <button class="btn-ui" onclick="toggleFilter()">Bộ lọc ▽</button>
-        <button class="btn-ui btn-post" onclick="alert('Đang phát triển!')">Đăng tin +</button>
+        <button class="btn-ui btn-post" onclick="alert('Tính năng đang phát triển!')">Đăng tin +</button>
     </div>
     
     <div class="filter-panel" id="filterPanel">
         <div class="filter-grid">
             <select id="fType"><option value="">Loại hình</option><option value="Đất nền">Đất nền</option><option value="Nhà phố">Nhà phố</option><option value="Biệt thự">Biệt thự</option></select>
-            <select id="fPrice"><option value="">Giá</option><option value="1">Dưới 2 tỷ</option><option value="2">2-5 tỷ</option><option value="3">Trên 5 tỷ</option></select>
+            <select id="fPrice"><option value="">Mức giá</option><option value="1">Dưới 2 tỷ</option><option value="2">2 - 5 tỷ</option><option value="3">Trên 5 tỷ</option></select>
             <select id="fSize"><option value="">Diện tích</option><option value="1">Dưới 100m²</option><option value="2">Trên 100m²</option></select>
             <select id="fDir"><option value="">Hướng</option><option value="Đông">Đông</option><option value="Tây">Tây</option><option value="Nam">Nam</option><option value="Bắc">Bắc</option></select>
         </div>
-        <button class="btn-ui" style="width:100%; margin-top:10px;" onclick="executeFilter()">ÁP DỤNG LỌC</button>
+        <button class="btn-ui" style="width:100%; margin-top:10px;" onclick="executeFilter()">XÁC NHẬN LỌC</button>
     </div>
 </div>
 
@@ -106,26 +109,51 @@
     L.control.zoom({ position: 'bottomright' }).addTo(map);
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
 
+    // TẠO LẠI 30 ĐIỂM DỮ LIỆU GIẢ LẬP TẠI RẠCH GIÁ
     const bdsData = [];
+    const types = ["Đất nền", "Nhà phố", "Biệt thự"];
+    const directions = ["Đông", "Tây", "Nam", "Bắc"];
+    
     for (let i = 1; i <= 30; i++) {
-        const lat = 10.005 + (Math.random() * 0.02);
-        const lng = 105.080 + (Math.random() * 0.03);
-        const price = (Math.random() * 8 + 1).toFixed(1);
-        bdsData.push({ id: "RG" + (i < 10 ? "0"+i : i), ten: "BĐS Cao Cấp " + i, gia: price + " tỷ", toaDo: [lat, lng], type: i % 3 == 0 ? "Biệt thự" : "Đất nền", priceVal: price < 2 ? "1" : (price < 5 ? "2" : "3"), dir: "Đông" });
+        const lat = 10.000 + (Math.random() * 0.03);
+        const lng = 105.070 + (Math.random() * 0.05);
+        const price = (Math.random() * 10 + 0.5).toFixed(1);
+        
+        bdsData.push({
+            id: "RG" + (i < 10 ? "0" + i : i),
+            ten: types[i % 3] + " Khu vực " + i,
+            gia: price + " tỷ",
+            toaDo: [lat, lng],
+            type: types[i % 3],
+            priceVal: price < 2 ? "1" : (price < 5 ? "2" : "3"),
+            dir: directions[i % 4]
+        });
     }
 
     var clusters = L.markerClusterGroup({
         iconCreateFunction: function(cluster) {
             var count = cluster.getChildCount();
-            var colorClass = count < 10 ? 'small' : (count < 100 ? 'medium' : 'large');
-            return new L.DivIcon({ html: '<div><span>' + count + '</span></div>', className: 'marker-cluster marker-cluster-' + colorClass, iconSize: new L.Point(40, 40) });
+            var className = ' marker-cluster-';
+            if (count < 10) className += 'small';
+            else if (count < 100) className += 'medium';
+            else className += 'large';
+
+            return new L.DivIcon({ 
+                html: '<div><span>' + count + '</span></div>', 
+                className: 'marker-cluster' + className, 
+                iconSize: new L.Point(40, 40) 
+            });
         }
     });
 
     function render(data) {
         clusters.clearLayers();
         data.forEach(item => {
-            const icon = L.divIcon({ className: 'custom-pin', html: `<div class="price-pin"><div class="pin-label">${item.gia}</div><div class="pin-drop"></div></div>`, iconSize: [60, 60], iconAnchor: [30, 60] });
+            const icon = L.divIcon({
+                className: 'custom-pin',
+                html: `<div class="price-pin"><div class="pin-label">${item.gia}</div><div class="pin-drop"></div></div>`,
+                iconSize: [60, 60], iconAnchor: [30, 60]
+            });
             const marker = L.marker(item.toaDo, { icon: icon }).on('click', () => openDetail(item));
             clusters.addLayer(marker);
         });
@@ -136,22 +164,32 @@
 
     function toggleFilter() { document.getElementById('filterPanel').classList.toggle('active'); }
     function closePanel() { document.getElementById('side-panel').classList.remove('active'); }
+    
     function openDetail(item) {
-        document.getElementById('panelBody').innerHTML = `<h2>${item.ten}</h2><div style="font-size:30px; font-weight:900; color:var(--navy);">${item.gia}</div><a href="tel:0354244883" class="btn-call">LIÊN HỆ 0354 244 883</a>`;
+        document.getElementById('panelBody').innerHTML = `
+            <h2 style="color:var(--navy)">${item.ten}</h2>
+            <div style="font-size:32px; font-weight:900; color:var(--navy); border-bottom:2px solid var(--gold); padding-bottom:10px;">${item.gia}</div>
+            <p style="margin-top:20px;">Mã số: <b>${item.id}</b><br>Loại hình: ${item.type}<br>Hướng: ${item.dir}</p>
+            <a href="tel:0354244883" class="btn-call">LIÊN HỆ 0354 244 883</a>
+        `;
         document.getElementById('side-panel').classList.add('active');
         map.flyTo(item.toaDo, 17);
     }
+
     function executeSearch() {
         const q = document.getElementById('inputSearch').value.toUpperCase();
         const r = bdsData.find(i => i.id === q || i.ten.toUpperCase().includes(q));
-        if(r) openDetail(r); else alert("Không thấy!");
+        if(r) openDetail(r); else alert("Không tìm thấy!");
     }
+
     function executeFilter() {
         const t = document.getElementById('fType').value;
         const p = document.getElementById('fPrice').value;
-        const filtered = bdsData.filter(i => (!t || i.type === t) && (!p || i.priceVal === p));
+        const d = document.getElementById('fDir').value;
+        const filtered = bdsData.filter(i => (!t || i.type === t) && (!p || i.priceVal === p) && (!d || i.dir === d));
         render(filtered);
         toggleFilter();
+        if(filtered.length === 0) alert("Không có bất động sản phù hợp!");
     }
 </script>
 </body>
