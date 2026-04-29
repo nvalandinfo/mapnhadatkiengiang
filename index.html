@@ -3,32 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NVALAND - BẢN ĐỒ TƯƠNG TÁC</title>
+    <title>NVALAND PRO MAP</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
     
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, sans-serif; }
-        #map { width: 100%; height: 100vh; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        #map { width: 100%; height: 100vh; z-index: 1; }
 
-        /* HEADER NỔI */
-        .header-top {
-            position: absolute; top: 15px; left: 15px; right: 15px;
-            background: rgba(255, 255, 255, 0.9); z-index: 1000;
-            padding: 12px 20px; border-radius: 50px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            text-align: center; border: 1px solid #f97316;
+        /* LOGO NVALAND GÓC TRÊN TRÁI */
+        .brand-logo {
+            position: absolute; top: 20px; left: 20px; z-index: 1000;
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: white; padding: 10px 20px; border-radius: 12px;
+            font-weight: 900; font-size: 20px; letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(234, 88, 12, 0.4);
+            border: 2px solid rgba(255,255,255,0.2);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        /* STYLE GHIM VÀ GIÁ CỐ ĐỊNH */
+        /* Ô TÌM KIẾM THÔNG MINH PHÍA TRÊN */
+        .search-container {
+            position: absolute; top: 20px; right: 20px; left: 160px; /* Chừa chỗ cho logo */
+            z-index: 1000; transition: all 0.3s;
+        }
+        .search-box {
+            width: 100%; max-width: 500px; margin-left: auto;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px); /* Hiệu ứng kính mờ chuyên nghiệp */
+            border-radius: 15px; display: flex; align-items: center;
+            padding: 5px 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .search-box input {
+            border: none; background: transparent; padding: 12px;
+            width: 100%; outline: none; font-size: 15px; color: #333;
+        }
+        .search-box i { color: #f97316; font-size: 18px; }
+
+        /* KẾT QUẢ GỢI Ý */
+        .search-results {
+            position: absolute; top: 60px; right: 0; left: 0;
+            background: white; border-radius: 12px; overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-height: 0; transition: max-height 0.3s ease-out;
+        }
+        .search-results.active { max-height: 300px; border: 1px solid #eee; }
+        .result-item {
+            padding: 12px 15px; border-bottom: 1px solid #f9f9f9;
+            cursor: pointer; font-size: 14px; display: flex; flex-direction: column;
+        }
+        .result-item:hover { background: #fff7ed; }
+        .result-item b { color: #333; }
+        .result-item small { color: #999; }
+
+        /* GHIM VÀ GIÁ */
         .marker-with-label { position: relative; }
         .marker-label {
             position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
             background: #f97316; color: white; font-weight: bold;
             padding: 2px 10px; border-radius: 8px; font-size: 13px;
             border: 2px solid white; box-shadow: 0 3px 8px rgba(0,0,0,0.3);
-            white-space: nowrap;
         }
         .pin-icon {
             width: 35px; height: 35px;
@@ -36,25 +72,23 @@
             background-size: contain;
         }
 
-        /* TỐI ƯU POPUP CHO MOBILE (CHỨA ẢNH/VIDEO) */
-        .leaflet-popup-content-wrapper { border-radius: 15px; padding: 5px; }
-        .popup-container { width: 260px; font-size: 14px; }
-        .popup-container img, .popup-container video { 
-            width: 100%; border-radius: 10px; margin-bottom: 8px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .btn-contact {
-            display: block; text-align: center; background: #f97316;
-            color: white; padding: 10px; border-radius: 8px;
-            text-decoration: none; font-weight: bold; margin-top: 10px;
+        @media (max-width: 600px) {
+            .brand-logo { padding: 8px 12px; font-size: 14px; top: 15px; left: 15px; }
+            .search-container { left: 110px; top: 15px; right: 15px; }
+            .search-box input { padding: 8px; font-size: 13px; }
         }
     </style>
 </head>
 <body>
 
-<div class="header-top">
-    <strong style="color:#f97316">NVALAND BẤT ĐỘNG SẢN</strong>
-    <div style="font-size: 11px; color: #555;">Chạm vào ghim để xem chi tiết lô đất</div>
+<div class="brand-logo">NVALAND</div>
+
+<div class="search-container">
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Tìm tên lô, giá, khu vực..." oninput="handleSearch()">
+        <span style="cursor:pointer" onclick="handleSearch()">🔍</span>
+    </div>
+    <div id="searchResults" class="search-results"></div>
 </div>
 
 <div id="map"></div>
@@ -63,70 +97,80 @@
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
 <script>
-    // 1. DỮ LIỆU CÓ THÊM VIDEO
-    // Lưu ý: link video phải là link trực tiếp (đuôi .mp4) hoặc dùng mã nhúng iframe
+    // DỮ LIỆU LÔ ĐẤT
     const dataBDS = [
-        { 
-            id: 1, 
-            ten: "Villa Tân Cổ Điển - Lô A1", 
-            gia: "10 tỷ", 
-            toaDo: [10.012, 105.080], 
-            anh: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400",
-            video: "https://www.w3schools.com/html/mov_bbb.mp4", // Link video mp4 mẫu
-            mota: "Pháp lý: Sổ hồng riêng. Diện tích: 200m2."
-        },
-        { 
-            id: 2, 
-            ten: "Đất nền khu B - Lô 22", 
-            gia: "1 tỷ 200tr", 
-            toaDo: [10.013, 105.081], 
-            anh: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400",
-            video: "", // Để trống nếu không có video
-            mota: "Đất thổ cư 100%, gần chợ."
-        }
+        { id: 1, ten: "Villa Phú Cường A1", gia: "10 tỷ", toaDo: [10.012, 105.080], anh: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400", mota: "Gần biển, sân vườn rộng." },
+        { id: 2, ten: "Đất nền Tây Bắc 22", gia: "1 tỷ 200tr", toaDo: [10.013, 105.081], anh: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400", mota: "Sổ hồng riêng." },
+        { id: 3, ten: "Nhà phố Nguyễn Trung Trực", gia: "2 tỷ 500tr", toaDo: [10.005, 105.075], anh: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400", mota: "Kinh doanh tốt." }
     ];
 
     var map = L.map('map', { zoomControl: false }).setView([10.012, 105.080], 14);
-    
-    // Bản đồ vệ tinh
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
 
     var markers = L.markerClusterGroup();
+    var markerMap = {}; // Lưu trữ để tìm nhanh khi search
 
     dataBDS.forEach(item => {
-        // Tạo biểu tượng ghim có nhãn giá
         var customIcon = L.divIcon({
             className: 'marker-with-label',
             html: `<div class="marker-label">${item.gia}</div><div class="pin-icon"></div>`,
-            iconSize: [35, 35],
-            iconAnchor: [17, 35]
+            iconSize: [35, 35], iconAnchor: [17, 35]
         });
 
         var marker = L.marker(item.toaDo, { icon: customIcon });
-        
-        // Tạo nội dung Popup (Ảnh + Video + Thông tin)
-        let mediaHtml = `<img src="${item.anh}">`;
-        if(item.video) {
-            mediaHtml += `<video controls poster="${item.anh}">
-                            <source src="${item.video}" type="video/mp4">
-                            Trình duyệt không hỗ trợ video.
-                          </video>`;
-        }
-
         marker.bindPopup(`
-            <div class="popup-container">
-                ${mediaHtml}
+            <div style="width:200px">
+                <img src="${item.anh}" style="width:100%; border-radius:10px">
                 <b style="font-size:16px">${item.ten}</b><br>
-                <span style="color:#f97316; font-weight:bold; font-size:15px">${item.gia}</span>
-                <p style="margin: 8px 0; color:#666">${item.mota}</p>
-                <a href="tel:0901234567" class="btn-contact">📞 Gọi ngay</a>
+                <span style="color:#f97316; font-weight:bold">${item.gia}</span>
+                <p style="font-size:12px; color:#666">${item.mota}</p>
             </div>
         `);
 
         markers.addLayer(marker);
+        markerMap[item.id] = { marker, item };
     });
-
     map.addLayer(markers);
+
+    // XỬ LÝ TÌM KIẾM THÔNG MINH
+    function handleSearch() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const resultsDiv = document.getElementById('searchResults');
+        resultsDiv.innerHTML = '';
+
+        if (query.length < 1) {
+            resultsDiv.classList.remove('active');
+            return;
+        }
+
+        const filtered = dataBDS.filter(item => 
+            item.ten.toLowerCase().includes(query) || 
+            item.gia.toLowerCase().includes(query)
+        );
+
+        if (filtered.length > 0) {
+            filtered.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                div.innerHTML = `<b>${item.ten}</b><small>Giá: ${item.gia}</small>`;
+                div.onclick = () => {
+                    map.flyTo(item.toaDo, 18);
+                    setTimeout(() => markerMap[item.id].marker.openPopup(), 500);
+                    resultsDiv.classList.remove('active');
+                    document.getElementById('searchInput').value = item.ten;
+                };
+                resultsDiv.appendChild(div);
+            });
+            resultsDiv.classList.add('active');
+        } else {
+            resultsDiv.classList.remove('active');
+        }
+    }
+
+    // Đóng kết quả khi bấm ra ngoài bản đồ
+    map.on('click', () => {
+        document.getElementById('searchResults').classList.remove('active');
+    });
 </script>
 </body>
 </html>
