@@ -2,103 +2,144 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NVALAND MAP - GIÁ TRÊN GHIM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NVALAND MOBILE PRO</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
     
     <style>
-        body{margin:0;font-family:Arial;display:grid;grid-template-columns:350px 1fr;height:100vh}
-        #map{width:100%;height:100vh}
-        .sidebar{background:#fff;padding:15px;overflow-y:auto;border-right:1px solid #ddd;z-index:1000}
-        
-        /* HIỆU ỨNG CHỮ CỐ ĐỊNH TRÊN ĐẦU GIỌT NƯỚC */
-        .marker-with-label {
-            position: relative;
+        body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, sans-serif; overflow: hidden; }
+        #map { width: 100%; height: 100vh; z-index: 1; }
+
+        /* HEADER MOBILE */
+        header {
+            position: absolute; top: 10px; left: 10px; right: 10px;
+            background: white; z-index: 1000; border-radius: 12px;
+            padding: 10px 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex; align-items: center; justify-content: space-between;
         }
+        header h2 { margin: 0; font-size: 16px; color: #f97316; }
+
+        /* THANH DANH SÁCH TRƯỢT DƯỚI ĐÁY (MOBILE STYLE) */
+        .mobile-list {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: white; z-index: 1000;
+            border-top-left-radius: 20px; border-top-right-radius: 20px;
+            max-height: 35vh; overflow-y: auto; padding: 15px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+        }
+        .drag-handle {
+            width: 40px; height: 5px; background: #ddd;
+            margin: -5px auto 15px; border-radius: 10px;
+        }
+
+        /* CARD NGANG CHO MOBILE */
+        .card {
+            display: flex; gap: 12px; background: #fff;
+            border-radius: 12px; margin-bottom: 12px;
+            border: 1px solid #f0f0f0; padding: 8px;
+        }
+        .card img { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; }
+        .card-info { flex: 1; }
+        .card-info b { font-size: 14px; display: block; margin-bottom: 4px; }
+        .price { color: #f97316; font-weight: bold; font-size: 15px; }
+
+        /* GHIM VÀ CHỮ TRÊN ĐẦU */
+        .marker-with-label { position: relative; }
         .marker-label {
-            position: absolute;
-            top: -25px; /* Đẩy chữ lên trên đầu giọt nước */
-            left: 50%;
-            transform: translateX(-50%);
-            background: #f97316;
-            color: white;
-            font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 11px;
+            position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
+            background: #f97316; color: white; font-weight: bold;
+            padding: 2px 8px; border-radius: 6px; font-size: 12px;
+            border: 1.5px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             white-space: nowrap;
-            border: 1px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        /* Hình giọt nước (Sử dụng SVG để nhẹ và sắc nét) */
         .pin-icon {
-            width: 30px;
-            height: 30px;
-            background: url('https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png') no-repeat;
+            width: 32px; height: 32px;
+            background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat;
             background-size: contain;
         }
 
-        .card{background:#fff;border:1px solid #eee;border-radius:10px;margin-bottom:15px;cursor:pointer;overflow:hidden}
-        .card img{width:100%;height:150px;object-fit:cover}
-        .card-body{padding:10px}
-        .price-text{color:#f97316;font-weight:bold}
-        
-        @media(max-width:900px){body{grid-template-columns:1fr} .sidebar{display:none}}
+        /* ẨN SIDEBAR CŨ TRÊN DESKTOP */
+        @media (min-width: 901px) {
+            body { display: grid; grid-template-columns: 380px 1fr; }
+            .mobile-list { position: relative; height: 100vh; max-height: 100vh; border-radius: 0; }
+            .drag-handle, header { display: none; }
+        }
     </style>
 </head>
 <body>
-    <div class="sidebar">
-        <h2 style="color:#f97316; text-align:center">NVALAND BĐS</h2>
-        <div id="list"></div>
-    </div>
-    <div id="map"></div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<header>
+    <h2>NVALAND MAP</h2>
+    <div style="font-size: 12px; color: #666;">Kiên Giang 📍</div>
+</header>
 
-    <script>
-        const dataBDS = [
-            { id: 1, ten: "Lô A1 - Villa", gia: "10 tỷ", toaDo: [10.012, 105.080], anh: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400" },
-            { id: 2, ten: "Đất nền khu B", gia: "1 tỷ 200tr", toaDo: [10.013, 105.081], anh: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400" },
-            { id: 3, ten: "Nhà phố MT", gia: "2 tỷ 200tr", toaDo: [10.005, 105.075], anh: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400" }
-        ];
+<div id="map"></div>
 
-        var map = L.map('map').setView([10.012, 105.080], 14);
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
+<div class="mobile-list">
+    <div class="drag-handle"></div>
+    <div id="list-items"></div>
+</div>
 
-        var markers = L.markerClusterGroup();
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
-        dataBDS.forEach(item => {
-            // TẠO BIỂU TƯỢNG KẾT HỢP GIỮA GIỌT NƯỚC VÀ CHỮ
-            var customIcon = L.divIcon({
-                className: 'marker-with-label',
-                html: `<div class="marker-label">${item.gia}</div><div class="pin-icon"></div>`,
-                iconSize: [30, 30],
-                iconAnchor: [15, 30] // Căn cho chóp nhọn giọt nước đúng tọa độ
-            });
+<script>
+    const dataBDS = [
+        { id: 1, ten: "Lô A1 - Villa Kiên Giang", gia: "10 tỷ", toaDo: [10.012, 105.080], anh: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400" },
+        { id: 2, ten: "Đất nền trung tâm", gia: "1 tỷ 200tr", toaDo: [10.013, 105.081], anh: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400" },
+        { id: 3, ten: "Nhà phố view biển", gia: "2 tỷ 200tr", toaDo: [10.005, 105.075], anh: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400" }
+    ];
 
-            var marker = L.marker(item.toaDo, { icon: customIcon });
-            
-            marker.bindPopup(`
-                <div style="width:180px">
-                    <img src="${item.anh}" style="width:100%; border-radius:5px">
-                    <b>${item.ten}</b><br>
-                    <span style="color:orange">${item.gia}</span>
-                </div>
-            `);
+    var map = L.map('map', { zoomControl: false }).setView([10.012, 105.080], 14);
+    
+    // Bản đồ vệ tinh mặc định
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
 
-            markers.addLayer(marker);
+    var markers = L.markerClusterGroup();
 
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.innerHTML = `<img src="${item.anh}"><div class="card-body"><b>${item.ten}</b><br><span class="price-text">${item.gia}</span></div>`;
-            card.onclick = () => { map.flyTo(item.toaDo, 18); marker.openPopup(); };
-            document.getElementById('list').appendChild(card);
+    dataBDS.forEach(item => {
+        var customIcon = L.divIcon({
+            className: 'marker-with-label',
+            html: `<div class="marker-label">${item.gia}</div><div class="pin-icon"></div>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 32]
         });
 
-        map.addLayer(markers);
-    </script>
+        var marker = L.marker(item.toaDo, { icon: customIcon });
+        
+        marker.bindPopup(`
+            <div style="width:160px; font-size:14px">
+                <img src="${item.anh}" style="width:100%; border-radius:8px; margin-bottom:8px">
+                <b>${item.ten}</b><br><span style="color:#f97316">${item.gia}</span>
+            </div>
+        `);
+
+        markers.addLayer(marker);
+
+        // Tạo Card cho danh sách
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <img src="${item.anh}">
+            <div class="card-info">
+                <b>${item.ten}</b>
+                <span class="price">${item.gia}</span>
+            </div>
+        `;
+        card.onclick = () => { 
+            map.flyTo(item.toaDo, 17); 
+            marker.openPopup(); 
+            // Trên mobile, khi bấm vào card sẽ thu gọn list lại một chút để xem bản đồ
+            if(window.innerWidth < 900) {
+                document.querySelector('.mobile-list').scrollTop = 0;
+            }
+        };
+        document.getElementById('list-items').appendChild(card);
+    });
+
+    map.addLayer(markers);
+</script>
 </body>
 </html>
