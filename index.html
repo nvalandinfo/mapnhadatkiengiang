@@ -3,92 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NVALAND KIÊN GIANG</title>
+    <title>NVALAND MAP PRO</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    
     <style>
-        body{margin:0;font-family:Arial;background:#f1f5f9;display:grid;grid-template-columns:350px 1fr;height:100vh}
-        .sidebar{background:#fff;padding:15px;overflow-y:auto;border-right:1px solid #ddd;z-index:1001}
+        body{margin:0;font-family:Arial;display:grid;grid-template-columns:350px 1fr;height:100vh}
         #map{width:100%;height:100vh}
-        .card{background:#fff;border:1px solid #eee;border-radius:10px;margin-bottom:15px;cursor:pointer;overflow:hidden;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
+        .sidebar{background:#fff;padding:15px;overflow-y:auto;border-right:1px solid #ddd;z-index:1000}
+        
+        /* HIỆU ỨNG HIỂN THỊ GIÁ TRÊN GHIM */
+        .price-label {
+            background: #f97316;
+            border: 2px solid white;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            padding: 2px 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .card{background:#fff;border:1px solid #eee;border-radius:10px;margin-bottom:15px;cursor:pointer;overflow:hidden;transition: 0.2s}
+        .card:hover{box-shadow:0 5px 15px rgba(0,0,0,0.1)}
         .card img{width:100%;height:150px;object-fit:cover}
         .card-body{padding:10px}
-        .price{color:#f97316;font-weight:bold}
-        header{grid-column: span 2; background:#fff; padding:10px 20px; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center}
+        .price-text{color:#f97316;font-weight:bold}
+        
         @media(max-width:900px){body{grid-template-columns:1fr} .sidebar{display:none}}
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <h2>Dự án nổi bật</h2>
+        <h2 style="color:#f97316">NVALAND BĐS</h2>
         <div id="list"></div>
     </div>
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
     <script>
-        // 1. CÀI ĐẶT DỮ LIỆU LÔ ĐẤT Ở ĐÂY (Bạn có thể thêm bớt ở đây)
-        const duAn = [
-            {
-                id: 1,
-                ten: "Villa Tân cổ điển - Lô A1",
-                gia: "4.5 tỷ",
-                anh: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400",
-                toaDo: [10.012, 105.080],
-                mota: "View sân vườn, chỗ đậu xe rộng rãi."
-            },
-            {
-                id: 2,
-                ten: "Đất nền Khu phố 2",
-                gia: "2.1 tỷ",
-                anh: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400",
-                toaDo: [10.005, 105.075],
-                mota: "Sổ hồng riêng, thổ cư 100%."
-            }
+        // 1. DỮ LIỆU BẤT ĐỘNG SẢN (Thêm tọa độ thật của bạn vào đây)
+        const dataBDS = [
+            { id: 1, ten: "Lô A1 - Phú Cường", gia: "4.5 tỷ", toaDo: [10.012, 105.080], anh: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400" },
+            { id: 2, ten: "Lô A2 - Phú Cường", gia: "3.2 tỷ", toaDo: [10.013, 105.081], anh: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400" },
+            { id: 3, ten: "Đất nền Tây Bắc", gia: "1.8 tỷ", toaDo: [10.005, 105.075], anh: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400" },
+            { id: 4, ten: "Nhà phố MT Nguyễn Trung Trực", gia: "6.5 tỷ", toaDo: [10.020, 105.090], anh: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400" }
         ];
 
         // 2. KHỞI TẠO BẢN ĐỒ
         var map = L.map('map').setView([10.012, 105.080], 14);
 
-        // Chế độ xem vệ tinh
         var veTinh = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
         var duongXa = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+        L.control.layers({"Vệ tinh": veTinh, "Đường phố": duongXa}).addTo(map);
 
-        L.control.layers({"Vệ tinh": veTinh, "Đường xá": duongXa}).addTo(map);
+        // 3. KHỞI TẠO CỤM (CLUSTER) - Tự động gom nhóm khi thu nhỏ
+        var markers = L.markerClusterGroup();
 
-        // 3. TỰ ĐỘNG TẠO GHIM VÀ DANH SÁCH
+        // 4. DUYỆT DỮ LIỆU ĐỂ HIỂN THỊ
         const listDiv = document.getElementById('list');
 
-        duAn.forEach(item => {
-            // Tạo ghim trên bản đồ
-            var marker = L.marker(item.toaDo).addTo(map);
-            
-            // Nội dung khi bấm vào ghim
-            var popupMain = `
-                <div style="width:180px">
-                    <img src="${item.anh}" style="width:100%; border-radius:5px">
-                    <b>${item.ten}</b><br>
-                    <span style="color:orange">${item.gia}</span><br>
-                    <small>${item.mota}</small>
-                </div>
-            `;
-            marker.bindPopup(popupMain);
+        dataBDS.forEach(item => {
+            // TẠO NHÃN HIỆN GIÁ (Label thay vì biểu tượng giọt nước)
+            var priceIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class='price-label'>${item.gia}</div>`,
+                iconSize: [60, 25],
+                iconAnchor: [30, 12]
+            });
 
-            // Tạo thẻ bên danh sách trái
+            var marker = L.marker(item.toaDo, { icon: priceIcon });
+            
+            // Nội dung Popup khi nhấn vào giá
+            marker.bindPopup(`
+                <div style="width:200px">
+                    <img src="${item.anh}" style="width:100%; border-radius:5px">
+                    <h4 style="margin:5px 0">${item.ten}</h4>
+                    <b style="color:#f97316">${item.gia}</b>
+                </div>
+            `);
+
+            markers.addLayer(marker);
+
+            // Tạo danh sách bên trái
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
                 <img src="${item.anh}">
                 <div class="card-body">
                     <b>${item.ten}</b><br>
-                    <span class="price">${item.gia}</span>
+                    <span class="price-text">${item.gia}</span>
                 </div>
             `;
             card.onclick = () => {
-                map.flyTo(item.toaDo, 17);
-                marker.openPopup();
+                map.flyTo(item.toaDo, 18);
+                setTimeout(() => marker.openPopup(), 500);
             };
             listDiv.appendChild(card);
         });
+
+        map.addLayer(markers);
     </script>
 </body>
 </html>
