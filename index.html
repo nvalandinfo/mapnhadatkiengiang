@@ -3,140 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NVALAND MOBILE PRO</title>
+    <title>NVALAND - BẢN ĐỒ TƯƠNG TÁC</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
     
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, sans-serif; overflow: hidden; }
-        #map { width: 100%; height: 100vh; z-index: 1; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, sans-serif; }
+        #map { width: 100%; height: 100vh; }
 
-        /* HEADER MOBILE */
-        header {
-            position: absolute; top: 10px; left: 10px; right: 10px;
-            background: white; z-index: 1000; border-radius: 12px;
-            padding: 10px 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        header h2 { margin: 0; font-size: 16px; color: #f97316; }
-
-        /* THANH DANH SÁCH TRƯỢT DƯỚI ĐÁY (MOBILE STYLE) */
-        .mobile-list {
-            position: absolute; bottom: 0; left: 0; right: 0;
-            background: white; z-index: 1000;
-            border-top-left-radius: 20px; border-top-right-radius: 20px;
-            max-height: 35vh; overflow-y: auto; padding: 15px;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-        }
-        .drag-handle {
-            width: 40px; height: 5px; background: #ddd;
-            margin: -5px auto 15px; border-radius: 10px;
+        /* HEADER NỔI */
+        .header-top {
+            position: absolute; top: 15px; left: 15px; right: 15px;
+            background: rgba(255, 255, 255, 0.9); z-index: 1000;
+            padding: 12px 20px; border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-align: center; border: 1px solid #f97316;
         }
 
-        /* CARD NGANG CHO MOBILE */
-        .card {
-            display: flex; gap: 12px; background: #fff;
-            border-radius: 12px; margin-bottom: 12px;
-            border: 1px solid #f0f0f0; padding: 8px;
-        }
-        .card img { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; }
-        .card-info { flex: 1; }
-        .card-info b { font-size: 14px; display: block; margin-bottom: 4px; }
-        .price { color: #f97316; font-weight: bold; font-size: 15px; }
-
-        /* GHIM VÀ CHỮ TRÊN ĐẦU */
+        /* STYLE GHIM VÀ GIÁ CỐ ĐỊNH */
         .marker-with-label { position: relative; }
         .marker-label {
-            position: absolute; top: -28px; left: 50%; transform: translateX(-50%);
+            position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
             background: #f97316; color: white; font-weight: bold;
-            padding: 2px 8px; border-radius: 6px; font-size: 12px;
-            border: 1.5px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            padding: 2px 10px; border-radius: 8px; font-size: 13px;
+            border: 2px solid white; box-shadow: 0 3px 8px rgba(0,0,0,0.3);
             white-space: nowrap;
         }
         .pin-icon {
-            width: 32px; height: 32px;
+            width: 35px; height: 35px;
             background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat;
             background-size: contain;
         }
 
-        /* ẨN SIDEBAR CŨ TRÊN DESKTOP */
-        @media (min-width: 901px) {
-            body { display: grid; grid-template-columns: 380px 1fr; }
-            .mobile-list { position: relative; height: 100vh; max-height: 100vh; border-radius: 0; }
-            .drag-handle, header { display: none; }
+        /* TỐI ƯU POPUP CHO MOBILE (CHỨA ẢNH/VIDEO) */
+        .leaflet-popup-content-wrapper { border-radius: 15px; padding: 5px; }
+        .popup-container { width: 260px; font-size: 14px; }
+        .popup-container img, .popup-container video { 
+            width: 100%; border-radius: 10px; margin-bottom: 8px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .btn-contact {
+            display: block; text-align: center; background: #f97316;
+            color: white; padding: 10px; border-radius: 8px;
+            text-decoration: none; font-weight: bold; margin-top: 10px;
         }
     </style>
 </head>
 <body>
 
-<header>
-    <h2>NVALAND MAP</h2>
-    <div style="font-size: 12px; color: #666;">Kiên Giang 📍</div>
-</header>
+<div class="header-top">
+    <strong style="color:#f97316">NVALAND BẤT ĐỘNG SẢN</strong>
+    <div style="font-size: 11px; color: #555;">Chạm vào ghim để xem chi tiết lô đất</div>
+</div>
 
 <div id="map"></div>
-
-<div class="mobile-list">
-    <div class="drag-handle"></div>
-    <div id="list-items"></div>
-</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
 <script>
+    // 1. DỮ LIỆU CÓ THÊM VIDEO
+    // Lưu ý: link video phải là link trực tiếp (đuôi .mp4) hoặc dùng mã nhúng iframe
     const dataBDS = [
-        { id: 1, ten: "Lô A1 - Villa Kiên Giang", gia: "10 tỷ", toaDo: [10.012, 105.080], anh: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400" },
-        { id: 2, ten: "Đất nền trung tâm", gia: "1 tỷ 200tr", toaDo: [10.013, 105.081], anh: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400" },
-        { id: 3, ten: "Nhà phố view biển", gia: "2 tỷ 200tr", toaDo: [10.005, 105.075], anh: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400" }
+        { 
+            id: 1, 
+            ten: "Villa Tân Cổ Điển - Lô A1", 
+            gia: "10 tỷ", 
+            toaDo: [10.012, 105.080], 
+            anh: "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=400",
+            video: "https://www.w3schools.com/html/mov_bbb.mp4", // Link video mp4 mẫu
+            mota: "Pháp lý: Sổ hồng riêng. Diện tích: 200m2."
+        },
+        { 
+            id: 2, 
+            ten: "Đất nền khu B - Lô 22", 
+            gia: "1 tỷ 200tr", 
+            toaDo: [10.013, 105.081], 
+            anh: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=400",
+            video: "", // Để trống nếu không có video
+            mota: "Đất thổ cư 100%, gần chợ."
+        }
     ];
 
     var map = L.map('map', { zoomControl: false }).setView([10.012, 105.080], 14);
     
-    // Bản đồ vệ tinh mặc định
+    // Bản đồ vệ tinh
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
 
     var markers = L.markerClusterGroup();
 
     dataBDS.forEach(item => {
+        // Tạo biểu tượng ghim có nhãn giá
         var customIcon = L.divIcon({
             className: 'marker-with-label',
             html: `<div class="marker-label">${item.gia}</div><div class="pin-icon"></div>`,
-            iconSize: [32, 32],
-            iconAnchor: [16, 32]
+            iconSize: [35, 35],
+            iconAnchor: [17, 35]
         });
 
         var marker = L.marker(item.toaDo, { icon: customIcon });
         
+        // Tạo nội dung Popup (Ảnh + Video + Thông tin)
+        let mediaHtml = `<img src="${item.anh}">`;
+        if(item.video) {
+            mediaHtml += `<video controls poster="${item.anh}">
+                            <source src="${item.video}" type="video/mp4">
+                            Trình duyệt không hỗ trợ video.
+                          </video>`;
+        }
+
         marker.bindPopup(`
-            <div style="width:160px; font-size:14px">
-                <img src="${item.anh}" style="width:100%; border-radius:8px; margin-bottom:8px">
-                <b>${item.ten}</b><br><span style="color:#f97316">${item.gia}</span>
+            <div class="popup-container">
+                ${mediaHtml}
+                <b style="font-size:16px">${item.ten}</b><br>
+                <span style="color:#f97316; font-weight:bold; font-size:15px">${item.gia}</span>
+                <p style="margin: 8px 0; color:#666">${item.mota}</p>
+                <a href="tel:0901234567" class="btn-contact">📞 Gọi ngay</a>
             </div>
         `);
 
         markers.addLayer(marker);
-
-        // Tạo Card cho danh sách
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-            <img src="${item.anh}">
-            <div class="card-info">
-                <b>${item.ten}</b>
-                <span class="price">${item.gia}</span>
-            </div>
-        `;
-        card.onclick = () => { 
-            map.flyTo(item.toaDo, 17); 
-            marker.openPopup(); 
-            // Trên mobile, khi bấm vào card sẽ thu gọn list lại một chút để xem bản đồ
-            if(window.innerWidth < 900) {
-                document.querySelector('.mobile-list').scrollTop = 0;
-            }
-        };
-        document.getElementById('list-items').appendChild(card);
     });
 
     map.addLayer(markers);
