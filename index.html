@@ -3,72 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NVALAND - HỆ THỐNG BĐS RẠCH GIÁ</title>
+    <title>NVALAND - HỆ THỐNG BĐS CHUYÊN NGHIỆP</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     
     <style>
-        :root { --navy: #152238; --gold: #d4af37; --red: #e11d48; }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; }
+        :root { --navy: #152238; --gold: #d4af37; --red: #e11d48; --white: #ffffff; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Tahoma, sans-serif; overflow: hidden; }
         #map { width: 100%; height: 100vh; z-index: 1; }
 
         /* LOGO NVALAND */
         .brand-header {
             position: absolute; top: 15px; left: 15px; z-index: 1002;
-            background: var(--navy); padding: 10px 20px; border-radius: 8px;
+            background: var(--navy); padding: 12px 25px; border-radius: 8px;
             border: 2px solid var(--gold); box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         }
-        .brand-header span { color: var(--gold); font-size: 20px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
+        .brand-header span { color: var(--gold); font-size: 22px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
 
-        /* TÌM KIẾM VÀ BỘ LỌC */
+        /* KHU VỰC TÌM KIẾM & BỘ LỌC */
         .search-area {
             position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
-            z-index: 1001; width: 90%; max-width: 600px;
+            z-index: 1001; width: 90%; max-width: 700px;
         }
         .search-bar-wrapper {
             background: white; border-radius: 50px; display: flex; align-items: center;
-            padding: 5px 8px 5px 20px; box-shadow: 0 6px 25px rgba(0,0,0,0.2); border: 1.5px solid var(--navy);
+            padding: 5px 8px 5px 20px; box-shadow: 0 6px 25px rgba(0,0,0,0.2); border: 2px solid var(--navy);
         }
-        .search-bar-wrapper input { border: none; flex: 1; outline: none; font-size: 14px; color: var(--navy); }
-        .btn-action { background: var(--navy); color: var(--gold); border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 13px; margin-left: 5px; }
+        .search-bar-wrapper input { border: none; flex: 1; outline: none; font-size: 15px; color: var(--navy); }
+        
+        .btn-nav { background: var(--navy); color: var(--gold); border: none; padding: 10px 18px; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 13px; margin-left: 5px; transition: 0.3s; }
+        .btn-nav:hover { opacity: 0.9; }
 
-        /* BẢNG BỘ LỌC ẨN */
+        /* BẢNG BỘ LỌC CHI TIẾT */
         .filter-panel {
-            display: none; background: white; margin-top: 10px; border-radius: 15px; padding: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-top: 3px solid var(--gold);
+            display: none; background: white; margin-top: 12px; border-radius: 15px; padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-top: 4px solid var(--gold);
         }
         .filter-panel.active { display: block; }
-        .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .filter-grid select { padding: 8px; border-radius: 5px; border: 1px solid #ddd; }
+        .filter-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .filter-item label { display: block; font-size: 11px; font-weight: bold; color: #555; margin-bottom: 5px; text-transform: uppercase; }
+        .filter-item select { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ddd; font-size: 13px; background: #f9f9f9; outline: none; }
 
         /* GHIM GIỌT NƯỚC MÀU ĐỎ */
         .price-pin { display: flex; flex-direction: column; align-items: center; }
         .pin-label {
-            background: var(--navy); color: var(--gold); padding: 3px 10px;
-            border-radius: 5px; font-weight: bold; font-size: 12px;
+            background: var(--navy); color: var(--gold); padding: 4px 10px;
+            border-radius: 5px; font-weight: bold; font-size: 13px;
             border: 1.5px solid var(--gold); white-space: nowrap; margin-bottom: 2px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
         .pin-drop {
-            width: 30px; height: 30px;
+            width: 32px; height: 32px;
             background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center;
-            background-size: contain; filter: brightness(0) saturate(100%) invert(20%) sepia(85%) saturate(4500%) hue-rotate(345deg) brightness(95%) contrast(90%); /* Màu đỏ */
+            background-size: contain; filter: brightness(0) saturate(100%) invert(18%) sepia(91%) saturate(5479%) hue-rotate(346deg) brightness(91%) contrast(92%);
         }
 
-        /* SIDE PANEL */
+        /* SIDE PANEL (BẢNG THÔNG TIN) */
         #side-panel {
-            position: fixed; top: 0; right: -100%; width: 380px; height: 100%;
-            background: white; z-index: 2000; transition: 0.4s ease; box-shadow: -10px 0 30px rgba(0,0,0,0.15);
+            position: fixed; top: 0; right: -100%; width: 400px; height: 100%;
+            background: white; z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -10px 0 40px rgba(0,0,0,0.2);
         }
         #side-panel.active { right: 0; }
         .btn-call-fixed {
             display: block; width: 100%; background: var(--navy); color: var(--gold);
-            text-align: center; padding: 18px; border-radius: 10px;
-            text-decoration: none; font-weight: 800; font-size: 18px; margin-top: 25px;
-            border: 1px solid var(--gold);
+            text-align: center; padding: 20px; border-radius: 12px;
+            text-decoration: none; font-weight: 800; font-size: 18px; margin-top: 30px;
+            border: 1px solid var(--gold); box-shadow: 0 4px 12px rgba(21, 34, 56, 0.3);
         }
 
-        .leaflet-right .leaflet-control-zoom { margin-bottom: 30px !important; }
-        @media (max-width: 600px) { #side-panel { width: 100%; } .brand-header { display: none; } }
+        @media (max-width: 600px) {
+            #side-panel { width: 100%; }
+            .brand-header { display: none; }
+            .filter-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -77,37 +85,85 @@
 
 <div class="search-area">
     <div class="search-bar-wrapper">
-        <input type="text" id="inputSearch" placeholder="Nhập mã (RG01), tên hoặc giá...">
-        <button class="btn-action" onclick="toggleFilter()">Bộ lọc ▽</button>
-        <button class="btn-action" onclick="executeSearch()">Tìm</button>
+        <input type="text" id="inputSearch" placeholder="Nhập mã số, tên hoặc giá...">
+        <button class="btn-nav" onclick="toggleFilter()">Bộ lọc ▽</button>
+        <button class="btn-nav" onclick="executeSearch()">Tìm</button>
     </div>
     
     <div class="filter-panel" id="filterPanel">
         <div class="filter-grid">
-            <select id="fType"><option value="">Loại đất</option><option value="Đất nền">Đất nền</option></select>
-            <select id="fPrice"><option value="">Mức giá</option><option value="1">Dưới 2 tỷ</option></select>
-            <select id="fSize"><option value="">Diện tích</option><option value="100">Dưới 100m²</option></select>
-            <select id="fDir"><option value="">Hướng</option><option value="Đông">Đông</option></select>
+            <div class="filter-item">
+                <label>🏠 Loại nhà đất</label>
+                <select id="fType">
+                    <option value="">-- Tất cả loại hình --</option>
+                    <option value="Đất nền">Đất nền</option>
+                    <option value="Nhà phố">Nhà phố</option>
+                    <option value="Biệt thự">Biệt thự</option>
+                    <option value="Căn hộ">Căn hộ / Chung cư</option>
+                    <option value="Đất vườn">Đất vườn / Công</option>
+                    <option value="Kho bãi">Kho bãi / Xưởng</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label>💰 Mức giá (VNĐ)</label>
+                <select id="fPrice">
+                    <option value="">-- Tất cả mức giá --</option>
+                    <option value="1">Dưới 1 tỷ</option>
+                    <option value="2">1 tỷ - 2 tỷ</option>
+                    <option value="3">2 tỷ - 5 tỷ</option>
+                    <option value="4">5 tỷ - 10 tỷ</option>
+                    <option value="5">Trên 10 tỷ</option>
+                    <option value="6">Giá thỏa thuận</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label>📐 Diện tích</label>
+                <select id="fSize">
+                    <option value="">-- Tất cả diện tích --</option>
+                    <option value="1">Dưới 50m²</option>
+                    <option value="2">50m² - 100m²</option>
+                    <option value="3">100m² - 200m²</option>
+                    <option value="4">200m² - 500m²</option>
+                    <option value="5">Trên 500m²</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label>🧭 Hướng nhà/đất</label>
+                <select id="fDir">
+                    <option value="">-- Tất cả hướng --</option>
+                    <option value="Đông">Đông</option>
+                    <option value="Tây">Tây</option>
+                    <option value="Nam">Nam</option>
+                    <option value="Bắc">Bắc</option>
+                    <option value="Đông Bắc">Đông Bắc</option>
+                    <option value="Đông Nam">Đông Nam</option>
+                    <option value="Tây Bắc">Tây Bắc</option>
+                    <option value="Tây Nam">Tây Nam</option>
+                </select>
+            </div>
         </div>
+        <button class="btn-nav" style="width:100%; margin-top:15px; border-radius:8px; height:45px;" onclick="executeFilter()">ÁP DỤNG BỘ LỌC</button>
     </div>
 </div>
 
 <div id="side-panel">
-    <div style="padding:25px;">
-        <span onclick="closePanel()" style="float:right; font-size:30px; cursor:pointer;">✕</span>
-        <div id="panelBody" style="margin-top:40px;"></div>
+    <div style="padding:30px;">
+        <span onclick="closePanel()" style="float:right; font-size:35px; cursor:pointer; color:var(--navy); line-height: 1;">✕</span>
+        <div id="panelBody" style="margin-top:50px;"></div>
     </div>
 </div>
 
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.js"></script>
 
 <script>
+    // Dữ liệu mẫu mở rộng
     const bdsData = [
-        { id: "RG01", ten: "Đất Nền Phú Cường - Rạch Giá", gia: "3.5 tỷ", toaDo: [10.0085, 105.1052], mota: "Sổ hồng riêng, khu dân cư đông đúc.", sdt: "0354244883" },
-        { id: "RG02", ten: "Nhà Phố Lấn Biển Tây Bắc", gia: "4.2 tỷ", toaDo: [10.0128, 105.0805], mota: "Gần biển, không khí thoáng mát.", sdt: "0354244883" }
+        { id: "RG01", ten: "Đất Nền Phú Cường - P. An Hòa", gia: "3.5 tỷ", toaDo: [10.0085, 105.1052], mota: "Diện tích 5x20m, thổ cư 100%, gần bệnh viện đa khoa Kiên Giang.", type: "Đất nền", priceVal: "3", sizeVal: "2", dir: "Đông Nam" },
+        { id: "RG02", ten: "Nhà Phố Lấn Biển Tây Bắc", gia: "4.8 tỷ", toaDo: [10.0128, 105.0805], mota: "Nhà 1 trệt 2 lầu hoàn thiện, view biển cực đẹp.", type: "Nhà phố", priceVal: "3", sizeVal: "2", dir: "Tây Bắc" },
+        { id: "RG03", ten: "Biệt thự sân vườn Phú Cường", gia: "12.5 tỷ", toaDo: [10.0020, 105.0920], mota: "Đẳng cấp thượng lưu, hồ bơi riêng, an ninh 24/7.", type: "Biệt thự", priceVal: "5", sizeVal: "4", dir: "Nam" }
     ];
 
     var map = L.map('map', { zoomControl: true }).setView([10.012, 105.080], 14);
@@ -117,28 +173,38 @@
     var clusters = L.markerClusterGroup();
     var markerRefs = {};
 
-    bdsData.forEach(item => {
-        var icon = L.divIcon({
-            className: 'custom-icon',
-            html: `<div class="price-pin"><div class="pin-label">${item.gia}</div><div class="pin-drop"></div></div>`,
-            iconSize: [60, 60], iconAnchor: [30, 60]
+    function loadMarkers(data) {
+        clusters.clearLayers();
+        data.forEach(item => {
+            var icon = L.divIcon({
+                className: 'custom-pin-wrap',
+                html: `<div class="price-pin"><div class="pin-label">${item.gia}</div><div class="pin-drop"></div></div>`,
+                iconSize: [60, 60], iconAnchor: [30, 60]
+            });
+            var marker = L.marker(item.toaDo, { icon: icon });
+            marker.on('click', () => openDetail(item));
+            clusters.addLayer(marker);
+            markerRefs[item.id] = marker;
         });
-        var marker = L.marker(item.toaDo, { icon: icon });
-        marker.on('click', () => openDetail(item));
-        clusters.addLayer(marker);
-        markerRefs[item.id] = marker;
-    });
-    map.addLayer(clusters);
+        map.addLayer(clusters);
+    }
+
+    loadMarkers(bdsData);
 
     function toggleFilter() { document.getElementById('filterPanel').classList.toggle('active'); }
 
     function openDetail(item) {
         document.getElementById('panelBody').innerHTML = `
-            <div style="font-size:12px; color:#888; font-weight:bold;">MÃ SỐ: ${item.id}</div>
-            <h2 style="color:var(--navy); margin:10px 0;">${item.ten}</h2>
-            <div style="font-size:32px; color:var(--navy); font-weight:900; border-bottom:2px solid var(--gold); padding-bottom:10px;">${item.gia}</div>
-            <p style="margin-top:20px; line-height:1.6; color:#444;">${item.mota}</p>
+            <div style="font-size:13px; color:#888; font-weight:bold; letter-spacing:1px;">MÃ SỐ: ${item.id}</div>
+            <h2 style="color:var(--navy); margin:12px 0; font-size:24px;">${item.ten}</h2>
+            <div style="font-size:35px; color:var(--navy); font-weight:900; border-bottom:3px solid var(--gold); padding-bottom:10px;">${item.gia}</div>
+            <div style="margin-top:20px; display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:14px; color:#555;">
+                <div><b>Loại hình:</b> ${item.type}</div>
+                <div><b>Hướng:</b> ${item.dir}</div>
+            </div>
+            <p style="margin-top:20px; line-height:1.8; color:#444; font-size:15px;">${item.mota}</p>
             <a href="tel:0354244883" class="btn-call-fixed">LIÊN HỆ 0354 244 883</a>
+            <div style="margin-top:20px; text-align:center; color:#888; font-size:13px;">Nhấn vào nút để gọi trực tiếp cho chúng tôi</div>
         `;
         document.getElementById('side-panel').classList.add('active');
         map.flyTo(item.toaDo, 17);
@@ -148,8 +214,30 @@
 
     function executeSearch() {
         const query = document.getElementById('inputSearch').value.trim().toUpperCase();
-        const result = bdsData.find(i => i.id === query || i.ten.toUpperCase().includes(query) || i.gia.includes(query));
+        const result = bdsData.find(i => i.id === query || i.ten.toUpperCase().includes(query));
         if(result) openDetail(result); else alert("Không tìm thấy kết quả phù hợp!");
+    }
+
+    function executeFilter() {
+        const type = document.getElementById('fType').value;
+        const price = document.getElementById('fPrice').value;
+        const size = document.getElementById('fSize').value;
+        const dir = document.getElementById('fDir').value;
+
+        const filtered = bdsData.filter(i => {
+            return (!type || i.type === type) &&
+                   (!price || i.priceVal === price) &&
+                   (!size || i.sizeVal === size) &&
+                   (!dir || i.dir === dir);
+        });
+
+        loadMarkers(filtered);
+        if(filtered.length > 0) {
+            map.flyTo(filtered[0].toaDo, 14);
+            toggleFilter();
+        } else {
+            alert("Không có bất động sản nào phù hợp với bộ lọc này.");
+        }
     }
 </script>
 </body>
