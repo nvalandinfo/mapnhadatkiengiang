@@ -1,158 +1,52 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NVALAND - HỆ THỐNG BĐS CHUYÊN NGHIỆP</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
-    
-    <style>
-        :root { --navy: #152238; --gold: #d4af37; --red: #e11d48; }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; }
-        #map { width: 100%; height: 100vh; z-index: 1; background: #0b1320; }
+/* CLUSTER SIÊU ĐẸP - NVALAND STYLE */
+.marker-cluster {
+    border-radius: 50%;
+    background-clip: padding-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-        /* LOGO NVALAND */
-        .brand-header {
-            position: absolute; top: 15px; left: 15px; z-index: 1002;
-            background: var(--navy); padding: 10px 20px; border-radius: 8px;
-            border: 2px solid var(--gold); box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-        }
-        .brand-header span { color: var(--gold); font-size: 18px; font-weight: 800; text-transform: uppercase; }
+/* Vòng ngoài */
+.marker-cluster-small {
+    background: rgba(34, 197, 94, 0.25);
+}
+.marker-cluster-medium {
+    background: rgba(234, 179, 8, 0.25);
+}
+.marker-cluster-large {
+    background: rgba(249, 115, 22, 0.25);
+}
 
-        /* ĐIỀU KHIỂN TÌM KIẾM & BỘ LỌC */
-        .main-controls {
-            position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
-            z-index: 1001; width: 95%; max-width: 800px; display: flex; flex-direction: column; gap: 8px;
-        }
-        .search-row { display: flex; gap: 6px; align-items: center; }
-        .search-box {
-            flex: 1; background: white; border-radius: 50px; display: flex; align-items: center;
-            padding: 4px 15px; border: 2px solid var(--navy); box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        .search-box input { border: none; flex: 1; outline: none; font-size: 14px; padding: 8px; }
-        .btn-ui { background: var(--navy); color: var(--gold); border: 1.5px solid var(--gold); padding: 10px 18px; border-radius: 25px; font-weight: bold; cursor: pointer; font-size: 12px; }
-        .btn-post { background: #28a745; color: white; border-color: #ffffff; }
+/* Vòng trong */
+.marker-cluster div {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-        /* BẢNG BỘ LỌC CHI TIẾT */
-        .filter-panel {
-            display: none; background: white; border-radius: 12px; padding: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-top: 4px solid var(--gold);
-        }
-        .filter-panel.active { display: block; }
-        .filter-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .filter-grid select { padding: 8px; border-radius: 6px; border: 1px solid #ddd; font-size: 13px; outline: none; }
+    font-size: 14px;
+    font-weight: 800;
+    color: white;
 
-        /* GHIM ĐỎ MẶC ĐỊNH */
-        .price-pin { display: flex; flex-direction: column; align-items: center; }
-        .pin-label { background: var(--navy); color: var(--gold); padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; border: 1px solid var(--gold); }
-        .pin-drop {
-            width: 30px; height: 30px;
-            background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center;
-            background-size: contain; filter: hue-rotate(140deg) brightness(0.8) saturate(5);
-        }
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: 0.2s;
+}
 
-        /* TÙY CHỈNH CỤM (CLUSTER) THEO MÀU */
-        .marker-cluster-small { background-color: rgba(110, 204, 57, 0.6); }
-        .marker-cluster-small div { background-color: rgba(110, 204, 57, 1); }
-        .marker-cluster-medium { background-color: rgba(241, 211, 87, 0.6); }
-        .marker-cluster-medium div { background-color: rgba(241, 211, 87, 1); }
-        .marker-cluster-large { background-color: rgba(253, 156, 115, 0.6); }
-        .marker-cluster-large div { background-color: rgba(253, 156, 115, 1); }
-        .marker-cluster { background-clip: padding-box; border-radius: 20px; }
-        .marker-cluster div { width: 30px; height: 30px; margin-left: 5px; margin-top: 5px; text-align: center; border-radius: 15px; font: 12px Arial; font-weight: bold; line-height: 30px; }
+/* Màu từng cấp */
+.marker-cluster-small div {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+.marker-cluster-medium div {
+    background: linear-gradient(135deg, #facc15, #ca8a04);
+}
+.marker-cluster-large div {
+    background: linear-gradient(135deg, #fb923c, #ea580c);
+}
 
-        /* SIDE PANEL */
-        #side-panel { position: fixed; top: 0; right: -100%; width: 380px; height: 100%; background: white; z-index: 2000; transition: 0.4s ease; box-shadow: -10px 0 30px rgba(0,0,0,0.2); }
-        #side-panel.active { right: 0; }
-        .btn-call { display: block; width: 100%; background: var(--navy); color: var(--gold); text-align: center; padding: 18px; border-radius: 10px; text-decoration: none; font-weight: 800; font-size: 18px; margin-top: 20px; border: 1px solid var(--gold); }
-
-        @media (max-width: 600px) { .brand-header { display: none; } #side-panel { width: 100%; } .filter-grid { grid-template-columns: 1fr; } }
-    </style>
-</head>
-<body>
-
-<div class="brand-header"><span>NVALAND</span></div>
-
-<div class="main-controls">
-    <div class="search-row">
-        <div class="search-box">
-            <input type="text" id="inputSearch" placeholder="Mã (RG01...), tên, giá...">
-            <button onclick="executeSearch()" style="background:none; border:none; cursor:pointer;">🔍</button>
-        </div>
-        <button class="btn-ui" onclick="toggleFilter()">Bộ lọc ▽</button>
-        <button class="btn-ui btn-post" onclick="alert('Đang phát triển!')">Đăng tin +</button>
-    </div>
-    
-    <div class="filter-panel" id="filterPanel">
-        <div class="filter-grid">
-            <select id="fType"><option value="">Loại hình</option><option value="Đất nền">Đất nền</option><option value="Nhà phố">Nhà phố</option><option value="Biệt thự">Biệt thự</option></select>
-            <select id="fPrice"><option value="">Giá</option><option value="1">Dưới 2 tỷ</option><option value="2">2-5 tỷ</option><option value="3">Trên 5 tỷ</option></select>
-            <select id="fSize"><option value="">Diện tích</option><option value="1">Dưới 100m²</option><option value="2">Trên 100m²</option></select>
-            <select id="fDir"><option value="">Hướng</option><option value="Đông">Đông</option><option value="Tây">Tây</option><option value="Nam">Nam</option><option value="Bắc">Bắc</option></select>
-        </div>
-        <button class="btn-ui" style="width:100%; margin-top:10px;" onclick="executeFilter()">ÁP DỤNG LỌC</button>
-    </div>
-</div>
-
-<div id="side-panel"><div style="padding:25px;"><span onclick="closePanel()" style="float:right; font-size:30px; cursor:pointer;">✕</span><div id="panelBody" style="margin-top:40px;"></div></div></div>
-<div id="map"></div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.js"></script>
-
-<script>
-    var map = L.map('map', { zoomControl: false }).setView([10.012, 105.090], 14);
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
-
-    const bdsData = [];
-    for (let i = 1; i <= 30; i++) {
-        const lat = 10.005 + (Math.random() * 0.02);
-        const lng = 105.080 + (Math.random() * 0.03);
-        const price = (Math.random() * 8 + 1).toFixed(1);
-        bdsData.push({ id: "RG" + (i < 10 ? "0"+i : i), ten: "BĐS Cao Cấp " + i, gia: price + " tỷ", toaDo: [lat, lng], type: i % 3 == 0 ? "Biệt thự" : "Đất nền", priceVal: price < 2 ? "1" : (price < 5 ? "2" : "3"), dir: "Đông" });
-    }
-
-    var clusters = L.markerClusterGroup({
-        iconCreateFunction: function(cluster) {
-            var count = cluster.getChildCount();
-            var colorClass = count < 10 ? 'small' : (count < 100 ? 'medium' : 'large');
-            return new L.DivIcon({ html: '<div><span>' + count + '</span></div>', className: 'marker-cluster marker-cluster-' + colorClass, iconSize: new L.Point(40, 40) });
-        }
-    });
-
-    function render(data) {
-        clusters.clearLayers();
-        data.forEach(item => {
-            const icon = L.divIcon({ className: 'custom-pin', html: `<div class="price-pin"><div class="pin-label">${item.gia}</div><div class="pin-drop"></div></div>`, iconSize: [60, 60], iconAnchor: [30, 60] });
-            const marker = L.marker(item.toaDo, { icon: icon }).on('click', () => openDetail(item));
-            clusters.addLayer(marker);
-        });
-        map.addLayer(clusters);
-    }
-
-    render(bdsData);
-
-    function toggleFilter() { document.getElementById('filterPanel').classList.toggle('active'); }
-    function closePanel() { document.getElementById('side-panel').classList.remove('active'); }
-    function openDetail(item) {
-        document.getElementById('panelBody').innerHTML = `<h2>${item.ten}</h2><div style="font-size:30px; font-weight:900; color:var(--navy);">${item.gia}</div><a href="tel:0354244883" class="btn-call">LIÊN HỆ 0354 244 883</a>`;
-        document.getElementById('side-panel').classList.add('active');
-        map.flyTo(item.toaDo, 17);
-    }
-    function executeSearch() {
-        const q = document.getElementById('inputSearch').value.toUpperCase();
-        const r = bdsData.find(i => i.id === q || i.ten.toUpperCase().includes(q));
-        if(r) openDetail(r); else alert("Không thấy!");
-    }
-    function executeFilter() {
-        const t = document.getElementById('fType').value;
-        const p = document.getElementById('fPrice').value;
-        const filtered = bdsData.filter(i => (!t || i.type === t) && (!p || i.priceVal === p));
-        render(filtered);
-        toggleFilter();
-    }
-</script>
-</body>
-</html>
+/* Hover effect */
+.marker-cluster:hover div {
+    transform: scale(1.15);
+}
