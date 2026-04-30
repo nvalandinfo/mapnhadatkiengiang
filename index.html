@@ -3,143 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NVALAND - BẢN ĐỒ BĐS RẠCH GIÁ</title>
-    <!-- CSS -->
+    <title>NVALAND - FIX TRIỆT ĐỂ 100%</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <style>
-        :root { --navy: #152238; --gold: #d4af37; --red: #ff0000; }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: sans-serif; overflow: hidden; }
+        :root { --navy: #152238; --gold: #d4af37; --red: #e11d48; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Arial, sans-serif; }
         #map { width: 100%; height: 100vh; z-index: 1; }
 
-        /* GIAO DIỆN ĐIỀU KHIỂN */
-        .header-controls {
-            position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; width: 95%; max-width: 900px; display: flex; flex-direction: column; gap: 10px;
+        /* THANH ĐIỀU KHIỂN & BỘ LỌC */
+        .top-ui {
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            z-index: 1001; width: 95%; max-width: 800px;
+            background: rgba(21, 34, 56, 0.95); padding: 15px; border-radius: 15px;
+            border: 1px solid var(--gold); box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
-        .search-row { display: flex; gap: 8px; align-items: center; background: rgba(21, 34, 56, 0.9); padding: 8px 15px; border-radius: 50px; border: 1px solid var(--gold); }
-        .search-box { flex: 1; display: flex; background: white; border-radius: 20px; padding: 5px 15px; }
-        .search-box input { border: none; outline: none; width: 100%; padding: 5px; }
+        .search-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .search-box { flex: 1; background: white; border-radius: 25px; display: flex; padding: 5px 15px; }
+        .search-box input { border: none; outline: none; width: 100%; font-size: 14px; }
         
-        .btn-action { background: var(--navy); color: var(--gold); border: 1px solid var(--gold); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; white-space: nowrap; font-size: 13px; }
+        .filter-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .filter-row select { flex: 1; min-width: 100px; padding: 8px; border-radius: 5px; border: none; font-size: 12px; }
+        
+        .btn { padding: 8px 15px; border-radius: 20px; border: 1px solid var(--gold); cursor: pointer; font-weight: bold; font-size: 13px; }
+        .btn-gold { background: var(--gold); color: var(--navy); }
         .btn-post { background: #28a745; color: white; border: none; }
 
-        /* BỘ LỌC */
-        .filter-bar { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
-        .filter-bar select { padding: 5px 10px; border-radius: 5px; border: 1px solid var(--gold); background: white; font-size: 12px; }
+        /* GHIM ĐỎ SVG (KHÔNG LO LỖI ẢNH) */
+        .custom-pin-svg { display: flex; flex-direction: column; align-items: center; }
+        .pin-tag { background: var(--navy); color: var(--gold); padding: 1px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; border: 1px solid var(--gold); margin-bottom: -2px; z-index: 2; }
 
-        /* MARKER ĐỎ */
-        .red-pin-wrapper { display: flex; flex-direction: column; align-items: center; }
-        .pin-price { background: var(--navy); color: var(--gold); padding: 2px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; margin-bottom: 2px; border: 0.5px solid var(--gold); }
-        .pin-icon { width: 30px; height: 30px; background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center; background-size: contain; filter: hue-rotate(140deg) brightness(0.9) saturate(10); }
-
-        /* CỤM (CLUSTER) THEO HÌNH image_a6cb14.jpg */
-        .marker-cluster-small { background-color: rgba(110, 204, 57, 0.6); } /* Xanh lá < 10 */
-        .marker-cluster-small div { background-color: rgba(110, 204, 57, 1); }
-        .marker-cluster-medium { background-color: rgba(241, 211, 87, 0.6); } /* Vàng 10-100 */
-        .marker-cluster-medium div { background-color: rgba(241, 211, 87, 1); }
-        .marker-cluster-large { background-color: rgba(253, 156, 115, 0.6); } /* Cam > 100 */
-        .marker-cluster-large div { background-color: rgba(253, 156, 115, 1); }
-        
+        /* MÀU CỤM (CLUSTER) */
+        .marker-cluster-small { background-color: rgba(110, 204, 57, 0.6); }
+        .marker-cluster-small div { background-color: rgba(110, 204, 57, 1); color: white; }
+        .marker-cluster-medium { background-color: rgba(241, 211, 87, 0.6); }
+        .marker-cluster-medium div { background-color: rgba(241, 211, 87, 1); color: black; }
         .marker-cluster { background-clip: padding-box; border-radius: 20px; }
-        .marker-cluster div { width: 30px; height: 30px; margin-left: 5px; margin-top: 5px; text-align: center; border-radius: 15px; font: 12px Arial; font-weight: bold; line-height: 30px; color: black; }
+        .marker-cluster div { width: 30px; height: 30px; margin-left: 5px; margin-top: 5px; text-align: center; border-radius: 15px; font: 12px Arial; font-weight: bold; line-height: 30px; }
 
-        /* PANEL CHI TIẾT */
-        #detail-panel { position: fixed; right: -400px; top: 0; width: 350px; height: 100%; background: white; z-index: 2000; transition: 0.3s; padding: 20px; box-shadow: -2px 0 10px rgba(0,0,0,0.2); }
-        #detail-panel.active { right: 0; }
+        #info-box { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; background: white; padding: 15px; border-radius: 10px; display: none; width: 300px; box-shadow: 0 0 20px rgba(0,0,0,0.3); border-top: 5px solid var(--navy); }
     </style>
 </head>
 <body>
 
-<div class="header-controls">
+<div class="top-ui">
     <div class="search-row">
-        <div class="search-box"><input type="text" id="searchInput" placeholder="Tìm kiếm BĐS (RG01-RG30)..."></div>
-        <button class="btn-action btn-post">Đăng BĐS</button>
+        <div class="search-box"><input type="text" id="sInput" placeholder="Tìm theo mã RG01, RG02..."></div>
+        <button class="btn btn-post">ĐĂNG TIN +</button>
     </div>
-    <div class="filter-bar">
-        <select id="fType"><option value="">Loại hình</option><option value="Đất">Đất nền</option><option value="Nhà">Nhà phố</option></select>
-        <select id="fPrice"><option value="">Giá</option><option value="2">Dưới 2 tỷ</option><option value="5">Dưới 5 tỷ</option></select>
-        <select id="fDir"><option value="">Hướng</option><option value="Đông">Đông</option><option value="Tây">Tây</option></select>
-        <button class="btn-action" onclick="applyFilter()">Lọc</button>
+    <div class="filter-row">
+        <select id="sType"><option value="">Loại hình</option><option value="Đất">Đất nền</option><option value="Nhà">Nhà phố</option></select>
+        <select id="sPrice"><option value="">Mức giá</option><option value="3">Dưới 3 tỷ</option><option value="10">Trên 3 tỷ</option></select>
+        <button class="btn btn-gold" onclick="filterData()">LỌC NGAY</button>
     </div>
 </div>
 
-<div id="detail-panel">
-    <button onclick="document.getElementById('detail-panel').classList.remove('active')">Đóng</button>
-    <div id="content"></div>
-</div>
-
+<div id="info-box"></div>
 <div id="map"></div>
 
-<!-- SCRIPTS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.js"></script>
 
 <script>
-    // 1. Bản đồ vệ tinh
-    const map = L.map('map', {zoomControl: false}).setView([10.012, 105.090], 14);
+    // 1. Khởi tạo Map
+    var map = L.map('map', {zoomControl: false}).setView([10.012, 105.090], 14);
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
 
-    // 2. Tạo 30 dữ liệu mẫu chuẩn (RG01 - RG30)
-    const rawData = [];
+    // 2. Tạo 30 dữ liệu mẫu (Cố định tọa độ quanh Rạch Giá)
+    const bdsList = [];
     for (let i = 1; i <= 30; i++) {
-        rawData.push({
+        bdsList.push({
             id: "RG" + (i < 10 ? "0"+i : i),
-            lat: 10.000 + (Math.random() * 0.03),
-            lng: 105.070 + (Math.random() * 0.05),
-            gia: (Math.random() * 9 + 1).toFixed(1),
-            loai: i % 2 === 0 ? "Nhà" : "Đất",
-            huong: i % 2 === 0 ? "Đông" : "Tây"
+            lat: 10.005 + (Math.random() * 0.02),
+            lng: 105.075 + (Math.random() * 0.03),
+            gia: (Math.random() * 8 + 1).toFixed(1),
+            loai: i % 2 === 0 ? "Nhà" : "Đất"
         });
     }
 
-    // 3. Cluster đổi màu theo số lượng
-    const clusters = L.markerClusterGroup({
+    // 3. SVG Ghim Đỏ (Đảm bảo không bao giờ lỗi hiển thị)
+    const redPinSVG = `
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="red" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 0C7.58 0 4 3.58 4 8c0 5.25 8 13 8 13s8-7.75 8-13c0-4.42-3.58-8-8-8zm0 11c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z" stroke="white" stroke-width="1"/>
+        </svg>`;
+
+    var clusters = L.markerClusterGroup({
         iconCreateFunction: function(cluster) {
-            const count = cluster.getChildCount();
-            let c = ' small';
-            if (count >= 100) c = ' large';
-            else if (count >= 10) c = ' medium';
-            return new L.DivIcon({ 
-                html: '<div><span>' + count + '</span></div>', 
-                className: 'marker-cluster marker-cluster-' + c.trim(), 
-                iconSize: [40, 40] 
-            });
+            var count = cluster.getChildCount();
+            var color = count < 10 ? 'small' : 'medium';
+            return new L.DivIcon({ html: '<div><span>' + count + '</span></div>', className: 'marker-cluster marker-cluster-' + color, iconSize: [40, 40] });
         }
     });
 
-    function render(list) {
+    function draw(data) {
         clusters.clearLayers();
-        list.forEach(item => {
-            const icon = L.divIcon({
-                className: 'custom-div-icon',
-                html: `<div class="red-pin-wrapper"><div class="pin-price">${item.gia} tỷ</div><div class="pin-icon"></div></div>`,
-                iconSize: [60, 50], iconAnchor: [30, 45]
+        data.forEach(item => {
+            var icon = L.divIcon({
+                className: 'custom-pin-svg',
+                html: `<div class="pin-tag">${item.gia} tỷ</div>${redPinSVG}`,
+                iconSize: [30, 45], iconAnchor: [15, 45]
             });
-            const m = L.marker([item.lat, item.lng], {icon: icon}).on('click', () => {
-                document.getElementById('content').innerHTML = `<h2>${item.id}</h2><p>Giá: ${item.gia} tỷ</p><p>Loại: ${item.loai}</p>`;
-                document.getElementById('detail-panel').classList.add('active');
+            var m = L.marker([item.lat, item.lng], {icon: icon}).on('click', function() {
+                var box = document.getElementById('info-box');
+                box.style.display = 'block';
+                box.innerHTML = `<strong>${item.id}</strong><br>Loại: ${item.loai}<br>Giá: ${item.gia} tỷ<br><button onclick="this.parentElement.style.display='none'" style="margin-top:10px; width:100%">Đóng</button>`;
+                map.flyTo([item.lat, item.lng], 16);
             });
             clusters.addLayer(m);
         });
         map.addLayer(clusters);
     }
 
-    // Khởi chạy lần đầu
-    render(rawData);
+    // Chạy vẽ lần đầu
+    draw(bdsList);
 
-    // Tìm kiếm & Lọc
-    function applyFilter() {
-        const t = document.getElementById('fType').value;
-        const p = document.getElementById('fPrice').value;
-        const filtered = rawData.filter(i => (!t || i.loai === t) && (!p || parseFloat(i.gia) <= p));
-        render(filtered);
+    // Hàm Lọc
+    function filterData() {
+        var t = document.getElementById('sType').value;
+        var p = document.getElementById('sPrice').value;
+        var filtered = bdsList.filter(i => (!t || i.loai === t) && (!p || (p == "3" ? i.gia <= 3 : i.gia > 3)));
+        draw(filtered);
     }
 
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        const val = e.target.value.toUpperCase();
-        const filtered = rawData.filter(i => i.id.includes(val));
-        render(filtered);
+    // Tìm kiếm nhanh
+    document.getElementById('sInput').addEventListener('input', function(e) {
+        var val = e.target.value.toUpperCase();
+        var found = bdsList.filter(i => i.id.includes(val));
+        draw(found);
     });
 </script>
 </body>
