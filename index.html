@@ -2,121 +2,145 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NVALAND - FIX HIỂN THỊ 30 ĐIỂM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NVALAND - BẢN ĐỒ BĐS RẠCH GIÁ</title>
+    <!-- CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
-    
     <style>
-        :root { --navy: #152238; --gold: #d4af37; }
-        body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
-        #map { width: 100%; height: 100vh; background: #0b1320; }
+        :root { --navy: #152238; --gold: #d4af37; --red: #ff0000; }
+        body, html { margin: 0; padding: 0; height: 100%; font-family: sans-serif; overflow: hidden; }
+        #map { width: 100%; height: 100vh; z-index: 1; }
 
-        /* LOGO & ĐIỀU KHIỂN */
-        .brand-header { position: absolute; top: 15px; left: 15px; z-index: 1002; background: var(--navy); padding: 10px 20px; border-radius: 8px; border: 2px solid var(--gold); }
-        .brand-header span { color: var(--gold); font-size: 18px; font-weight: 800; text-transform: uppercase; }
+        /* GIAO DIỆN ĐIỀU KHIỂN */
+        .header-controls {
+            position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; width: 95%; max-width: 900px; display: flex; flex-direction: column; gap: 10px;
+        }
+        .search-row { display: flex; gap: 8px; align-items: center; background: rgba(21, 34, 56, 0.9); padding: 8px 15px; border-radius: 50px; border: 1px solid var(--gold); }
+        .search-box { flex: 1; display: flex; background: white; border-radius: 20px; padding: 5px 15px; }
+        .search-box input { border: none; outline: none; width: 100%; padding: 5px; }
+        
+        .btn-action { background: var(--navy); color: var(--gold); border: 1px solid var(--gold); padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; white-space: nowrap; font-size: 13px; }
+        .btn-post { background: #28a745; color: white; border: none; }
 
-        .main-controls { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); z-index: 1001; width: 90%; max-width: 600px; }
-        .search-row { display: flex; gap: 8px; }
-        .search-box { flex: 1; background: white; border-radius: 50px; display: flex; align-items: center; padding: 0 15px; border: 2px solid var(--navy); }
-        .search-box input { border: none; flex: 1; outline: none; padding: 10px; }
-        .btn-ui { background: var(--navy); color: var(--gold); border: 1.5px solid var(--gold); padding: 10px 15px; border-radius: 25px; font-weight: bold; cursor: pointer; }
+        /* BỘ LỌC */
+        .filter-bar { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
+        .filter-bar select { padding: 5px 10px; border-radius: 5px; border: 1px solid var(--gold); background: white; font-size: 12px; }
 
-        /* GHIM ĐỎ */
-        .price-pin { display: flex; flex-direction: column; align-items: center; }
-        .pin-label { background: var(--navy); color: var(--gold); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; border: 1px solid var(--gold); }
-        .pin-drop { width: 30px; height: 30px; background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center; background-size: contain; filter: hue-rotate(140deg) brightness(0.8) saturate(5); }
+        /* MARKER ĐỎ */
+        .red-pin-wrapper { display: flex; flex-direction: column; align-items: center; }
+        .pin-price { background: var(--navy); color: var(--gold); padding: 2px 5px; border-radius: 3px; font-size: 10px; font-weight: bold; margin-bottom: 2px; border: 0.5px solid var(--gold); }
+        .pin-icon { width: 30px; height: 30px; background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center; background-size: contain; filter: hue-rotate(140deg) brightness(0.9) saturate(10); }
 
-        /* CLUSTER THEO HÌNH MINH HỌA */
-        .marker-cluster-small { background-color: rgba(110, 204, 57, 0.6); } /* Xanh < 10 */
-        .marker-cluster-small div { background-color: rgba(110, 204, 57, 1); color: white; }
+        /* CỤM (CLUSTER) THEO HÌNH image_a6cb14.jpg */
+        .marker-cluster-small { background-color: rgba(110, 204, 57, 0.6); } /* Xanh lá < 10 */
+        .marker-cluster-small div { background-color: rgba(110, 204, 57, 1); }
         .marker-cluster-medium { background-color: rgba(241, 211, 87, 0.6); } /* Vàng 10-100 */
-        .marker-cluster-medium div { background-color: rgba(241, 211, 87, 1); color: black; }
+        .marker-cluster-medium div { background-color: rgba(241, 211, 87, 1); }
+        .marker-cluster-large { background-color: rgba(253, 156, 115, 0.6); } /* Cam > 100 */
+        .marker-cluster-large div { background-color: rgba(253, 156, 115, 1); }
+        
         .marker-cluster { background-clip: padding-box; border-radius: 20px; }
-        .marker-cluster div { width: 30px; height: 30px; margin-left: 5px; margin-top: 5px; text-align: center; border-radius: 15px; font: 12px Arial; font-weight: bold; line-height: 30px; }
+        .marker-cluster div { width: 30px; height: 30px; margin-left: 5px; margin-top: 5px; text-align: center; border-radius: 15px; font: 12px Arial; font-weight: bold; line-height: 30px; color: black; }
 
-        #side-panel { position: fixed; top: 0; right: -100%; width: 350px; height: 100%; background: white; z-index: 2000; transition: 0.4s; box-shadow: -5px 0 15px rgba(0,0,0,0.3); padding: 20px; }
-        #side-panel.active { right: 0; }
+        /* PANEL CHI TIẾT */
+        #detail-panel { position: fixed; right: -400px; top: 0; width: 350px; height: 100%; background: white; z-index: 2000; transition: 0.3s; padding: 20px; box-shadow: -2px 0 10px rgba(0,0,0,0.2); }
+        #detail-panel.active { right: 0; }
     </style>
 </head>
 <body>
 
-<div class="brand-header"><span>NVALAND</span></div>
-
-<div class="main-controls">
+<div class="header-controls">
     <div class="search-row">
-        <div class="search-box"><input type="text" id="inputSearch" placeholder="Nhập RG01 đến RG30..."></div>
-        <button class="btn-ui" onclick="executeSearch()">TÌM</button>
+        <div class="search-box"><input type="text" id="searchInput" placeholder="Tìm kiếm BĐS (RG01-RG30)..."></div>
+        <button class="btn-action btn-post">Đăng BĐS</button>
+    </div>
+    <div class="filter-bar">
+        <select id="fType"><option value="">Loại hình</option><option value="Đất">Đất nền</option><option value="Nhà">Nhà phố</option></select>
+        <select id="fPrice"><option value="">Giá</option><option value="2">Dưới 2 tỷ</option><option value="5">Dưới 5 tỷ</option></select>
+        <select id="fDir"><option value="">Hướng</option><option value="Đông">Đông</option><option value="Tây">Tây</option></select>
+        <button class="btn-action" onclick="applyFilter()">Lọc</button>
     </div>
 </div>
 
-<div id="side-panel">
-    <span onclick="this.parentElement.classList.remove('active')" style="float:right; cursor:pointer; font-size:24px;">✕</span>
-    <div id="panelBody" style="margin-top:40px;"></div>
+<div id="detail-panel">
+    <button onclick="document.getElementById('detail-panel').classList.remove('active')">Đóng</button>
+    <div id="content"></div>
 </div>
 
 <div id="map"></div>
 
+<!-- SCRIPTS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.js"></script>
 
 <script>
-    // 1. Khởi tạo map tại Rạch Giá
-    var map = L.map('map', { zoomControl: false }).setView([10.012, 105.090], 14);
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
+    // 1. Bản đồ vệ tinh
+    const map = L.map('map', {zoomControl: false}).setView([10.012, 105.090], 14);
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
 
-    // 2. Tạo dữ liệu 30 điểm
-    const data = [];
+    // 2. Tạo 30 dữ liệu mẫu chuẩn (RG01 - RG30)
+    const rawData = [];
     for (let i = 1; i <= 30; i++) {
-        data.push({
+        rawData.push({
             id: "RG" + (i < 10 ? "0"+i : i),
-            ten: "Bất động sản mẫu " + i,
-            gia: (Math.random() * 5 + 1).toFixed(1) + " tỷ",
-            lat: 10.005 + (Math.random() * 0.02),
-            lng: 105.080 + (Math.random() * 0.03)
+            lat: 10.000 + (Math.random() * 0.03),
+            lng: 105.070 + (Math.random() * 0.05),
+            gia: (Math.random() * 9 + 1).toFixed(1),
+            loai: i % 2 === 0 ? "Nhà" : "Đất",
+            huong: i % 2 === 0 ? "Đông" : "Tây"
         });
     }
 
     // 3. Cluster đổi màu theo số lượng
-    var clusters = L.markerClusterGroup({
+    const clusters = L.markerClusterGroup({
         iconCreateFunction: function(cluster) {
-            var count = cluster.getChildCount();
-            var color = count < 10 ? 'small' : 'medium';
+            const count = cluster.getChildCount();
+            let c = ' small';
+            if (count >= 100) c = ' large';
+            else if (count >= 10) c = ' medium';
             return new L.DivIcon({ 
                 html: '<div><span>' + count + '</span></div>', 
-                className: 'marker-cluster marker-cluster-' + color, 
+                className: 'marker-cluster marker-cluster-' + c.trim(), 
                 iconSize: [40, 40] 
             });
         }
     });
 
-    // 4. Vẽ điểm lên bản đồ (Ghim đỏ)
-    data.forEach(item => {
-        var icon = L.divIcon({
-            className: 'custom-pin',
-            html: `<div class="price-pin"><div class="pin-label">${item.gia}</div><div class="pin-drop"></div></div>`,
-            iconSize: [60, 60], iconAnchor: [30, 60]
-        });
-        var marker = L.marker([item.lat, item.lng], { icon: icon })
-            .on('click', () => {
-                document.getElementById('panelBody').innerHTML = `<h2>${item.ten}</h2><p>Mã số: ${item.id}</p><h3>Giá: ${item.gia}</h3>`;
-                document.getElementById('side-panel').classList.add('active');
+    function render(list) {
+        clusters.clearLayers();
+        list.forEach(item => {
+            const icon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class="red-pin-wrapper"><div class="pin-price">${item.gia} tỷ</div><div class="pin-icon"></div></div>`,
+                iconSize: [60, 50], iconAnchor: [30, 45]
             });
-        clusters.addLayer(marker);
-    });
-
-    map.addLayer(clusters); // BẮT BUỘC PHẢI CÓ LỆNH NÀY
-
-    function executeSearch() {
-        const q = document.getElementById('inputSearch').value.toUpperCase();
-        const r = data.find(i => i.id === q);
-        if(r) {
-            map.flyTo([r.lat, r.lng], 17);
-            document.getElementById('panelBody').innerHTML = `<h2>${r.ten}</h2><p>Mã: ${r.id}</p><h3>Giá: ${r.gia}</h3>`;
-            document.getElementById('side-panel').classList.add('active');
-        } else { alert("Hãy nhập từ RG01 đến RG30"); }
+            const m = L.marker([item.lat, item.lng], {icon: icon}).on('click', () => {
+                document.getElementById('content').innerHTML = `<h2>${item.id}</h2><p>Giá: ${item.gia} tỷ</p><p>Loại: ${item.loai}</p>`;
+                document.getElementById('detail-panel').classList.add('active');
+            });
+            clusters.addLayer(m);
+        });
+        map.addLayer(clusters);
     }
+
+    // Khởi chạy lần đầu
+    render(rawData);
+
+    // Tìm kiếm & Lọc
+    function applyFilter() {
+        const t = document.getElementById('fType').value;
+        const p = document.getElementById('fPrice').value;
+        const filtered = rawData.filter(i => (!t || i.loai === t) && (!p || parseFloat(i.gia) <= p));
+        render(filtered);
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        const val = e.target.value.toUpperCase();
+        const filtered = rawData.filter(i => i.id.includes(val));
+        render(filtered);
+    });
 </script>
 </body>
 </html>
