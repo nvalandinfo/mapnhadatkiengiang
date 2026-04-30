@@ -3,154 +3,127 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NVALAND MAP</title>
+<title>NVALAND MAP PRO</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
 
 <style>
-:root {
-    --navy:#1e3a5f;
-    --yellow:#facc15;
-    --green:#16a34a;
-    --red:#e11d48;
+:root{
+--navy:#1f3b5f;
+--yellow:#facc15;
+--green:#22c55e;
+--red:#ef4444;
 }
 
-/* RESET */
 body,html{margin:0;height:100%;font-family:Arial}
-
-/* MAP */
-#map{height:100vh;width:100%}
+#map{height:100vh}
 
 /* HEADER */
 .header{
-    position:absolute;
-    top:0;
-    left:0;
-    width:100%;
-    height:60px;
-    background:var(--navy);
-    z-index:1000;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 20px;
-    box-sizing:border-box;
+position:absolute;
+top:0;
+width:100%;
+height:60px;
+background:var(--navy);
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 20px;
+z-index:1000;
 }
+.logo{color:#fff;font-weight:900;font-size:20px}
 
-.logo{
-    color:#fff;
-    font-weight:900;
-    font-size:20px;
+.center{
+display:flex;
+gap:10px;
 }
-
-.header-center{
-    display:flex;
-    gap:10px;
-}
-
 .btn{
-    padding:10px 18px;
-    border-radius:25px;
-    border:none;
-    cursor:pointer;
-    font-weight:700;
+padding:10px 18px;
+border-radius:25px;
+border:none;
+cursor:pointer;
+font-weight:bold;
 }
-
-.btn-search{
-    background:var(--yellow);
-}
-
-.btn-post{
-    background:#334155;
-    color:#fff;
-}
+.btn-search{background:var(--yellow)}
+.btn-post{background:#334155;color:#fff}
 
 /* CLUSTER */
 .marker-cluster div{
-    width:42px;height:42px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    color:#fff;font-weight:800;
+width:40px;height:40px;border-radius:50%;
+display:flex;align-items:center;justify-content:center;
+color:#fff;font-weight:800;
 }
 .marker-cluster-small div{background:#22c55e}
 .marker-cluster-medium div{background:#facc15}
 .marker-cluster-large div{background:#f97316}
 
 /* PIN */
-.price-pin{display:flex;flex-direction:column;align-items:center}
-.pin-label{
-    background:#fff;
-    padding:2px 6px;
-    border-radius:4px;
-    font-size:11px;
-    font-weight:bold;
+.pin{
+display:flex;
+flex-direction:column;
+align-items:center;
 }
-.pin-dot{
-    width:14px;height:14px;
-    background:var(--red);
-    border-radius:50%;
-    border:3px solid #fff;
+.label{
+background:#fff;
+padding:2px 6px;
+border-radius:4px;
+font-size:11px;
+font-weight:bold;
+}
+.dot{
+width:14px;height:14px;
+background:var(--red);
+border-radius:50%;
+border:3px solid white;
 }
 
-/* PANEL TRƯỢT */
+/* PANEL */
 #panel{
-    position:fixed;
-    top:0;
-    right:-420px;
-    width:400px;
-    height:100%;
-    background:#fff;
-    z-index:2000;
-    transition:0.35s ease;
-    box-shadow:-10px 0 30px rgba(0,0,0,0.3);
-    overflow:auto;
+position:fixed;
+right:-420px;
+top:0;
+width:400px;
+height:100%;
+background:#fff;
+transition:.35s;
+z-index:2000;
+overflow:auto;
+box-shadow:-10px 0 30px rgba(0,0,0,0.3);
+}
+#panel.active{right:0}
+
+.close{
+position:absolute;
+right:10px;
+top:10px;
+font-size:22px;
+cursor:pointer;
 }
 
-#panel.active{
-    right:0;
-}
-
-.panel-header{
-    padding:15px;
-    font-weight:bold;
-    border-bottom:1px solid #eee;
-}
-
-.panel-body{
-    padding:15px;
-}
-
-.panel-body img{
-    width:100%;
-    border-radius:10px;
+.content{padding:20px}
+.content img{
+width:100%;
+border-radius:10px;
 }
 
 .price{
-    color:var(--red);
-    font-size:26px;
-    font-weight:900;
-    margin:10px 0;
+color:var(--red);
+font-size:26px;
+font-weight:900;
+margin:10px 0;
 }
 
-.btn-call{
-    display:block;
-    background:var(--green);
-    color:#fff;
-    text-align:center;
-    padding:15px;
-    border-radius:8px;
-    text-decoration:none;
-    margin-top:15px;
-    font-weight:bold;
-}
-
-/* NÚT ĐÓNG */
-.close-btn{
-    position:absolute;
-    top:10px;
-    right:15px;
-    font-size:22px;
-    cursor:pointer;
+.call{
+display:block;
+background:#16a34a;
+color:#fff;
+text-align:center;
+padding:15px;
+border-radius:8px;
+margin-top:15px;
+text-decoration:none;
+font-weight:bold;
 }
 </style>
 </head>
@@ -158,18 +131,18 @@ body,html{margin:0;height:100%;font-family:Arial}
 <body>
 
 <div class="header">
-    <div class="logo">NVALAND</div>
-    <div class="header-center">
-        <button class="btn btn-search">🔍 Tìm kiếm BĐS</button>
-        <button class="btn btn-post">+ Đăng BĐS</button>
-    </div>
+<div class="logo">NVALAND</div>
+<div class="center">
+<button class="btn btn-search">🔍 Tìm kiếm BĐS</button>
+<button class="btn btn-post">+ Đăng BĐS</button>
+</div>
 </div>
 
 <div id="map"></div>
 
 <div id="panel">
-    <div class="close-btn" onclick="closePanel()">✕</div>
-    <div class="panel-body" id="panelContent"></div>
+<div class="close" onclick="closePanel()">✕</div>
+<div class="content" id="panelData"></div>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -178,72 +151,72 @@ body,html{margin:0;height:100%;font-family:Arial}
 <script>
 
 // MAP
-var map = L.map('map').setView([10.012,105.09],14);
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
+var map = L.map('map').setView([10.012,105.09],13);
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}')
+.addTo(map);
 
-// DATA DEMO
-const data = [
-    {
-        ten:"Bán đất Rạch Giá",
-        gia:"830 triệu",
-        lat:10.01,
-        lng:105.09,
-        img:"https://images.unsplash.com/photo-1560518883-ce09059eeffa"
-    },
-    {
-        ten:"Nhà phố trung tâm",
-        gia:"2 tỷ 500",
-        lat:10.015,
-        lng:105.095,
-        img:"https://images.unsplash.com/photo-1570129477492-45c003edd2be"
-    }
-];
+// DATA 30 ĐIỂM DEMO
+const data=[];
+for(let i=0;i<30;i++){
+let lat=10.0+(Math.random()*0.03);
+let lng=105.08+(Math.random()*0.04);
+let price=(Math.random()*5+0.5).toFixed(2)+" tỷ";
+
+data.push({
+ten:"BĐS Rạch Giá "+(i+1),
+gia:price,
+lat:lat,
+lng:lng,
+img:"https://images.unsplash.com/photo-1560518883-ce09059eeffa"
+});
+}
 
 // CLUSTER
-var clusters = L.markerClusterGroup({
-    iconCreateFunction: function(cluster){
-        let count = cluster.getChildCount();
-        let size = count<10?'small':count<100?'medium':'large';
+var clusters=L.markerClusterGroup({
+iconCreateFunction:function(cluster){
+let count=cluster.getChildCount();
+let size=count<10?'small':count<100?'medium':'large';
 
-        return new L.DivIcon({
-            html:`<div>${count}</div>`,
-            className:`marker-cluster marker-cluster-${size}`,
-            iconSize:L.point(50,50)
-        });
-    }
+return new L.DivIcon({
+html:`<div>${count}</div>`,
+className:`marker-cluster marker-cluster-${size}`,
+iconSize:L.point(50,50)
+});
+}
 });
 
 // RENDER
 data.forEach(item=>{
-    let icon = L.divIcon({
-        html:`<div class="price-pin">
-                <div class="pin-label">${item.gia}</div>
-                <div class="pin-dot"></div>
-              </div>`,
-        iconSize:[60,60]
-    });
+let icon=L.divIcon({
+html:`<div class="pin">
+<div class="label">${item.gia}</div>
+<div class="dot"></div>
+</div>`,
+iconSize:[60,60]
+});
 
-    let marker = L.marker([item.lat,item.lng],{icon})
-    .on("click",()=>openPanel(item));
+let marker=L.marker([item.lat,item.lng],{icon})
+.on("click",()=>openPanel(item));
 
-    clusters.addLayer(marker);
+clusters.addLayer(marker);
 });
 
 map.addLayer(clusters);
 
 // PANEL
 function openPanel(item){
-    document.getElementById("panelContent").innerHTML=`
-        <img src="${item.img}">
-        <h3>${item.ten}</h3>
-        <div class="price">${item.gia}</div>
-        <a href="tel:0354244883" class="btn-call">📞 Gọi ngay</a>
-    `;
-    document.getElementById("panel").classList.add("active");
+document.getElementById("panelData").innerHTML=`
+<img src="${item.img}">
+<h3>${item.ten}</h3>
+<div class="price">${item.gia}</div>
+<p>📍 Rạch Giá - Kiên Giang</p>
+<a href="tel:0354244883" class="call">📞 Gọi ngay</a>
+`;
+document.getElementById("panel").classList.add("active");
 }
 
 function closePanel(){
-    document.getElementById("panel").classList.remove("active");
+document.getElementById("panel").classList.remove("active");
 }
 
 </script>
