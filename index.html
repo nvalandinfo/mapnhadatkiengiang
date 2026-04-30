@@ -79,76 +79,35 @@ border:3px solid white;
 }
 
 /* PANEL */
-#panel{
-position:fixed;
-right:-420px;
-top:0;
-width:400px;
-height:100%;
-background:#fff;
-transition:.35s;
-z-index:2000;
-overflow:auto;
-box-shadow:-10px 0 30px rgba(0,0,0,0.3);
-}
-#panel.active{right:0}
+function openPanel(item){
+document.getElementById("panelData").innerHTML=`
+<img src="${item.img}">
+<h3>${item.ten}</h3>
 
-.close{
-position:absolute;
-right:10px;
-top:10px;
-font-size:22px;
-cursor:pointer;
-}
+<div class="price">${item.gia}</div>
 
-.content{padding:20px}
-.content img{
-width:100%;
-border-radius:10px;
-}
+<p>📍 ${item.diachi || "Rạch Giá - Kiên Giang"}</p>
 
-.price{
-color:var(--red);
-font-size:26px;
-font-weight:900;
-margin:10px 0;
-}
+<div style="display:flex; gap:10px; margin-top:10px;">
+<a href="https://zalo.me/0354244883" target="_blank"
+style="flex:1;background:#0084ff;color:#fff;padding:12px;text-align:center;border-radius:6px;text-decoration:none;font-weight:bold;">
+💬 Zalo
+</a>
 
-.call{
-display:block;
-background:#16a34a;
-color:#fff;
-text-align:center;
-padding:15px;
-border-radius:8px;
-margin-top:15px;
-text-decoration:none;
-font-weight:bold;
-}
-</style>
-</head>
-
-<body>
-
-<div class="header">
-<div class="logo">NVALAND</div>
-<div class="center">
-<button class="btn btn-search">🔍 Tìm kiếm BĐS</button>
-<button class="btn btn-post">+ Đăng BĐS</button>
-</div>
+<a href="tel:0354244883"
+style="flex:1;background:#16a34a;color:#fff;padding:12px;text-align:center;border-radius:6px;text-decoration:none;font-weight:bold;">
+📞 Gọi
+</a>
 </div>
 
-<div id="map"></div>
+<button onclick="saveLead('${item.ten}')"
+style="width:100%;margin-top:10px;padding:12px;background:#facc15;border:none;border-radius:6px;font-weight:bold;">
+📩 Quan tâm
+</button>
+`;
 
-<div id="panel">
-<div class="close" onclick="closePanel()">✕</div>
-<div class="content" id="panelData"></div>
-</div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.js"></script>
-
-<script>
+document.getElementById("panel").classList.add("active");
+}
 
 // MAP
 var map = L.map('map').setView([10.012,105.09],13);
