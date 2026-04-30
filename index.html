@@ -1,52 +1,124 @@
-/* CLUSTER SIÊU ĐẸP - NVALAND STYLE */
-.marker-cluster {
-    border-radius: 50%;
-    background-clip: padding-box;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NVALAND MAP PRO</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
+
+<style>
+:root { --navy:#152238; --gold:#d4af37; --red:#e11d48; }
+body,html{margin:0;height:100%;font-family:Arial}
+#map{height:100vh}
+
+/* CLUSTER PRO */
+.marker-cluster{border-radius:50%;display:flex;align-items:center;justify-content:center}
+.marker-cluster div{
+    width:42px;height:42px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:800;
+}
+.marker-cluster-small div{background:#22c55e}
+.marker-cluster-medium div{background:#facc15}
+.marker-cluster-large div{background:#f97316}
+
+/* PIN */
+.price-pin{display:flex;flex-direction:column;align-items:center}
+.pin-label{
+    background:var(--navy);color:var(--gold);
+    padding:2px 6px;border-radius:4px;font-size:11px
+}
+.pin-dot{
+    width:14px;height:14px;background:var(--red);
+    border-radius:50%;border:3px solid #fff;
 }
 
-/* Vòng ngoài */
-.marker-cluster-small {
-    background: rgba(34, 197, 94, 0.25);
+/* PANEL */
+#panel{
+position:fixed;right:-100%;top:0;width:320px;height:100%;
+background:#fff;transition:.3s;padding:20px;
 }
-.marker-cluster-medium {
-    background: rgba(234, 179, 8, 0.25);
-}
-.marker-cluster-large {
-    background: rgba(249, 115, 22, 0.25);
+#panel.active{right:0}
+</style>
+</head>
+
+<body>
+
+<div id="map"></div>
+<div id="panel"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.js"></script>
+
+<script>
+
+// 🔑 DÁN API VÀO ĐÂY
+const API_KEY = "DÁN_API_KEY";
+const BASE_ID = "DÁN_BASE_ID";
+const TABLE = "BDS";
+
+const url = `https://api.airtable.com/v0/${BASE_ID}/${TABLE}`;
+
+// MAP
+var map = L.map('map').setView([10.012,105.09],14);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+// CLUSTER
+var clusters = L.markerClusterGroup({
+    iconCreateFunction: function(cluster){
+        let count = cluster.getChildCount();
+        let size = count<10?'small':count<100?'medium':'large';
+        return new L.DivIcon({
+            html:`<div>${count}</div>`,
+            className:`marker-cluster marker-cluster-${size}`,
+            iconSize:L.point(50,50)
+        });
+    }
+});
+
+// LOAD DATA
+async function loadData(){
+    let res = await fetch(url,{
+        headers:{ Authorization:`Bearer ${API_KEY}` }
+    });
+    let data = await res.json();
+
+    data.records.forEach(r=>{
+        let f = r.fields;
+
+        let icon = L.divIcon({
+            html:`<div class="price-pin">
+                    <div class="pin-label">${f.gia}</div>
+                    <div class="pin-dot"></div>
+                  </div>`,
+            className:"",
+            iconSize:[60,60]
+        });
+
+        let marker = L.marker([f.lat,f.lng],{icon})
+        .on("click",()=>openPanel(f));
+
+        clusters.addLayer(marker);
+    });
+
+    map.addLayer(clusters);
 }
 
-/* Vòng trong */
-.marker-cluster div {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+loadData();
 
-    font-size: 14px;
-    font-weight: 800;
-    color: white;
-
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    transition: 0.2s;
+// PANEL
+function openPanel(f){
+    document.getElementById("panel").innerHTML=`
+        <h2>${f.ten}</h2>
+        <h1>${f.gia}</h1>
+        <p>${f.type || ""}</p>
+        <a href="tel:${f.sdt}">📞 ${f.sdt}</a>
+    `;
+    document.getElementById("panel").classList.add("active");
 }
 
-/* Màu từng cấp */
-.marker-cluster-small div {
-    background: linear-gradient(135deg, #22c55e, #16a34a);
-}
-.marker-cluster-medium div {
-    background: linear-gradient(135deg, #facc15, #ca8a04);
-}
-.marker-cluster-large div {
-    background: linear-gradient(135deg, #fb923c, #ea580c);
-}
-
-/* Hover effect */
-.marker-cluster:hover div {
-    transform: scale(1.15);
-}
+</script>
+</body>
+</html>
