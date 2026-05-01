@@ -113,9 +113,10 @@
             display: flex; flex-direction: column; gap: 8px; 
         }
         
-        /* CHỈNH LẠI VỊ TRÍ ZOOM CONTROL CỦA LEAFLET */
+        /* CHỈNH LẠI VỊ TRÍ ZOOM CONTROL CỦA LEAFLET VÀ BỎ VIỀN */
         .leaflet-left .leaflet-control { margin-left: 0px; margin-bottom: 8px; }
-        .leaflet-control-zoom { border: 2px solid var(--navy) !important; border-radius: 8px !important; overflow: hidden; }
+        .leaflet-control-zoom { border: none !important; box-shadow: 0 1px 5px rgba(0,0,0,0.4); border-radius: 8px !important; overflow: hidden; }
+        .leaflet-control-zoom-in, .leaflet-control-zoom-out { border: none !important; }
 
         .btn-layer { background: white; border: 2px solid var(--navy); color: var(--navy); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; }
         .btn-layer.active { background: var(--navy); color: var(--gold); border-color: var(--gold); }
@@ -205,9 +206,8 @@
             </div>
         </div>
 
-        <!-- CẬP NHẬT: THỨ TỰ ĐIỀU KHIỂN ZOOM -> TIN ĐĂNG -> VỆ TINH -->
         <div class="map-layer-control">
-            <div id="zoom-container"></div> <!-- Container để Leaflet gắn nút zoom vào đây -->
+            <div id="zoom-container"></div> 
             
             <button class="btn-toggle-list" onclick="document.getElementById('sideListing').classList.toggle('mobile-active')">
                 <i class="fa fa-list"></i> Tin đăng
@@ -232,10 +232,8 @@
     const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri' });
     const streetLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] });
 
-    // KHỞI TẠO MAP: Đã dời zoomControl vào container tùy chỉnh
     var map = L.map('map', { zoomControl: false, layers: [satLayer] }).setView([10.012, 105.090], 14);
     
-    // Tạo zoom control và đưa vào div .map-layer-control
     L.control.zoom({ position: 'topleft' }).addTo(map);
     const zoomCtrl = document.querySelector('.leaflet-control-zoom');
     document.querySelector('.map-layer-control').prepend(zoomCtrl);
