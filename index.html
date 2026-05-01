@@ -43,15 +43,15 @@
         }
 
         .product-card img { width: 60px; height: 60px; border-radius: 4px; object-fit: cover; background: #ddd; }
-        .product-info { flex: 1; }
+        .product-info { flex: 1; position: relative; }
         .product-card:hover { background: #fff9e6; transform: translateX(5px); }
         .product-card h4 { margin: 0 0 5px 0; font-size: 13px; color: var(--navy); padding-right: 20px; }
         .product-card p { margin: 2px 0; font-size: 11px; color: #555; }
         
-        /* Layout cho hàng giá và ngày */
-        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
+        /* Layout giá và ngày đăng */
+        .card-row-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
         .product-card .price-tag { color: #d32f2f; font-weight: bold; font-size: 12px; }
-        .post-date { font-style: italic; font-size: 10px; color: #888; }
+        .product-card .date-tag { font-style: italic; color: #888; font-size: 10px; }
 
         .fav-icon {
             position: absolute;
@@ -79,9 +79,9 @@
             border: 1px solid var(--gold); box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             display: flex; flex-direction: column; gap: 6px;
         }
-        .row-flex { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+        .row-flex { display: flex; gap: 5px; align-items: center; }
         .input-custom {
-            flex: 1; min-width: 150px; background: white; border-radius: 4px;
+            flex: 1; background: white; border-radius: 4px;
             display: flex; align-items: center; padding: 0 8px; border: 1px solid var(--gold);
         }
         .input-custom input { border: none; outline: none; padding: 8px 4px; font-size: 13px; width: 100%; }
@@ -94,13 +94,6 @@
 
         .btn-post {
             background: #28a745; color: white; border: 1px solid white;
-            padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;
-            white-space: nowrap; transition: 0.3s;
-        }
-        
-        /* Nút Tiện ích */
-        .btn-tools {
-            background: #007bff; color: white; border: 1px solid white;
             padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;
             white-space: nowrap; transition: 0.3s;
         }
@@ -120,21 +113,16 @@
 
         .price-pin { display: flex; flex-direction: column; align-items: center; }
         .pin-label { background: var(--navy); color: var(--gold); padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; border: 1px solid var(--gold); }
-        .pin-drop { 
-            width: 24px; height: 24px; 
-            background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center; 
-            background-size: contain; 
-            filter: hue-rotate(345deg) brightness(0.9) saturate(5);
-        }
+        .pin-drop { width: 24px; height: 24px; background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center; background-size: contain; filter: hue-rotate(345deg) brightness(0.9) saturate(5); }
 
+        /* ĐIỀU KHIỂN BÊN TRÁI */
         .map-layer-control { 
-            position: absolute; bottom: 80px; left: 10px; z-index: 1002; 
+            position: absolute; bottom: 40px; left: 10px; z-index: 1002; 
             display: flex; flex-direction: column; gap: 8px; 
         }
         
-        .leaflet-left .leaflet-control { margin-left: 0px; margin-bottom: 8px; }
-        .leaflet-control-zoom { border: none !important; box-shadow: 0 1px 5px rgba(0,0,0,0.4); border-radius: 8px !important; overflow: hidden; }
-        .leaflet-control-zoom-in, .leaflet-control-zoom-out { border: none !important; }
+        .leaflet-left .leaflet-control { margin-left: 0px; margin-bottom: 0px; }
+        .leaflet-control-zoom { border: none !important; box-shadow: 0 1px 5px rgba(0,0,0,0.4); border-radius: 8px !important; overflow: hidden; margin-bottom: 8px !important; }
 
         .btn-layer { background: white; border: 2px solid var(--navy); color: var(--navy); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; }
         .btn-layer.active { background: var(--navy); color: var(--gold); border-color: var(--gold); }
@@ -146,13 +134,21 @@
             display: flex; align-items: center; gap: 5px;
         }
 
-        #side-panel, #tools-panel { position: fixed; top: 0; right: -100%; width: 100%; max-width: 350px; height: 100%; background: white; z-index: 2000; transition: 0.4s ease; box-shadow: -5px 0 15px rgba(0,0,0,0.2); }
-        #side-panel.active, #tools-panel.active { right: 0; }
+        /* Nút tiện ích */
+        .btn-utilities {
+            background: #1a73e8; color: white; border: 1px solid white;
+            padding: 10px 15px; border-radius: 8px; cursor: pointer;
+            font-size: 12px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            display: flex; align-items: center; gap: 5px;
+        }
 
-        /* Tiện ích list */
-        .tools-list { list-style: none; padding: 20px; margin: 0; }
-        .tools-list li { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; color: var(--navy); font-weight: 500; display: flex; align-items: center; gap: 10px; }
-        .tools-list li:hover { background: #f8f9fa; color: var(--gold); }
+        #side-panel, #utility-panel { position: fixed; top: 0; right: -100%; width: 100%; max-width: 350px; height: 100%; background: white; z-index: 2000; transition: 0.4s ease; box-shadow: -5px 0 15px rgba(0,0,0,0.2); }
+        #side-panel.active, #utility-panel.active { right: 0; }
+
+        .util-header { background: var(--navy); color: var(--gold); padding: 20px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; }
+        .util-item { padding: 15px 20px; border-bottom: 1px solid #eee; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: 0.2s; }
+        .util-item:hover { background: #f9f9f9; padding-left: 25px; color: var(--navy); }
+        .util-item i { color: var(--gold); font-size: 18px; width: 25px; }
 
         @media (max-width: 768px) {
             .side-listing { position: fixed; left: -100%; width: 80%; }
@@ -183,24 +179,13 @@
                         </button>
                     </div>
                     <button class="btn-navy-gold" onclick="toggleFilterPanel()"><i class="fa fa-filter"></i> Lọc</button>
-                    <button class="btn-post" onclick="alert('Đăng tin')"><i class="fa fa-plus"></i> Đăng tin</button>
-                    <button class="btn-tools" onclick="toggleToolsPanel()"><i class="fa fa-wrench"></i> Tiện ích</button>
+                    <button class="btn-post" onclick="alert('Chức năng Đăng tin đang phát triển')"><i class="fa fa-plus"></i> Đăng tin</button>
                 </div>
             </div>
-
             <div class="filter-expandable" id="filterPanel">
                 <div class="filter-grid">
-                    <select id="fType">
-                        <option value="">-- Loại nhà đất --</option>
-                        <option>Nhà riêng</option>
-                        <option>Nhà chung cư</option>
-                        <option>Đất nền riêng</option>
-                    </select>
-                    <select id="fPrice">
-                        <option value="">-- Mức giá --</option>
-                        <option>Dưới 1 tỷ</option>
-                        <option>Trên 1 tỷ</option>
-                    </select>
+                    <select id="fType"><option value="">-- Loại nhà đất --</option><option>Nhà riêng</option></select>
+                    <select id="fPrice"><option value="">-- Mức giá --</option><option>Dưới 500 triệu</option></select>
                 </div>
                 <button class="btn-apply-filter" onclick="executeFilter()">ÁP DỤNG BỘ LỌC</button>
             </div>
@@ -208,9 +193,15 @@
 
         <div class="map-layer-control">
             <div id="zoom-container"></div> 
+            
             <button class="btn-toggle-list" onclick="document.getElementById('sideListing').classList.toggle('mobile-active')">
                 <i class="fa fa-list"></i> Tin đăng
             </button>
+            
+            <button class="btn-utilities" onclick="toggleUtilityPanel()">
+                <i class="fa fa-th-large"></i> Tiện ích
+            </button>
+
             <button class="btn-layer active" id="btnSat" onclick="setLayer('sat')">Vệ tinh</button>
             <button class="btn-layer" id="btnStreet" onclick="setLayer('street')">Tên đường</button>
         </div>
@@ -218,18 +209,16 @@
     </div>
 </div>
 
-<!-- Panel Tiện ích -->
-<div id="tools-panel">
-    <div style="padding:20px; border-bottom: 1px solid #ddd; background: var(--navy); color: var(--gold); display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="margin:0; font-size:18px;">Tiện ích</h3>
-        <span onclick="toggleToolsPanel()" style="font-size:25px; cursor:pointer;">&times;</span>
+<!-- PANEL TIỆN ÍCH -->
+<div id="utility-panel">
+    <div class="util-header">
+        DANH MỤC TIỆN ÍCH
+        <span onclick="toggleUtilityPanel()" style="cursor:pointer; font-size: 24px;">&times;</span>
     </div>
-    <ul class="tools-list">
-        <li onclick="alert('Xem tuổi xây nhà')"><i class="fa fa-calendar-check"></i> Xem tuổi xây nhà</li>
-        <li onclick="alert('Chi phí làm nhà')"><i class="fa fa-calculator"></i> Chi phí làm nhà</li>
-        <li onclick="alert('Tính lãi suất')"><i class="fa fa-percent"></i> Tính lãi suất</li>
-        <li onclick="alert('Tư vấn phong thuỷ')"><i class="fa fa-compass"></i> Tư vấn phong thuỷ</li>
-    </ul>
+    <div class="util-item" onclick="alert('Tính năng Xem tuổi xây nhà')"><i class="fa fa-user-clock"></i> Xem tuổi xây nhà</div>
+    <div class="util-item" onclick="alert('Tính năng Chi phí làm nhà')"><i class="fa fa-calculator"></i> Chi phí làm nhà</div>
+    <div class="util-item" onclick="alert('Tính năng Tính lãi suất')"><i class="fa fa-percent"></i> Tính lãi suất</div>
+    <div class="util-item" onclick="alert('Tính năng Tư vấn phong thuỷ')"><i class="fa fa-compass"></i> Tư vấn phong thuỷ</div>
 </div>
 
 <div id="side-panel">
@@ -270,7 +259,7 @@
             id: "KG" + (i<10?"0"+i:i),
             ten: types[i % 4] + " đường số " + i,
             gia: (Math.random()*5+1).toFixed(1) + " tỷ",
-            ngay: (i % 28 + 1) + "/04/2026",
+            ngayDang: "01/05/2026",
             toaDo: [10.005 + (Math.random() * 0.03), 105.080 + (Math.random() * 0.04)],
             mota: "Diện tích 100m2, thông thoáng, pháp lý rõ ràng...",
             anh: "https://picsum.photos/id/" + (i+10) + "/200/200"
@@ -299,9 +288,9 @@
                 <div class="product-info">
                     <h4>${item.ten}</h4>
                     <p>Mã: ${item.id}</p>
-                    <div class="card-footer">
+                    <div class="card-row-bottom">
                         <div class="price-tag">${item.gia}</div>
-                        <div class="post-date">${item.ngay}</div>
+                        <div class="date-tag">${item.ngayDang}</div>
                     </div>
                 </div>
                 <i class="fa fa-heart fav-icon" onclick="toggleFavorite(event, this)"></i>
@@ -323,15 +312,15 @@
     }
 
     function toggleFilterPanel() { document.getElementById('filterPanel').classList.toggle('active'); }
-    function toggleToolsPanel() { document.getElementById('tools-panel').classList.toggle('active'); }
-    function executeFilter() { toggleFilterPanel(); alert("Đã lọc!"); }
+    function toggleUtilityPanel() { document.getElementById('utility-panel').classList.toggle('active'); }
+    function executeFilter() { toggleFilterPanel(); alert("Đã áp dụng bộ lọc!"); }
 
     function openDetail(item) {
         const mapsLink = `https://www.google.com/maps/dir/?api=1&destination=${item.toaDo[0]},${item.toaDo[1]}`;
         document.getElementById('panelBody').innerHTML = `
             <img src="${item.anh}" style="width:100%; border-radius:8px; margin-bottom:15px;">
             <h3 style="color:var(--navy)">${item.ten}</h3>
-            <p><b>Mã số:</b> ${item.id} - <i>Đăng ngày: ${item.ngay}</i></p>
+            <p><b>Mã số:</b> ${item.id} | <b>Ngày đăng:</b> ${item.ngayDang}</p>
             <p><b>Giá:</b> <span style="color:red; font-weight:bold">${item.gia}</span></p>
             <p>${item.mota}</p>
             <br>
@@ -348,13 +337,11 @@
         if(query) {
             const res = bdsData.find(i => i.id.includes(query));
             if(res) { map.setView(res.toaDo, 17); openDetail(res); } 
-            else { alert("Không tìm thấy!"); }
+            else { alert("Không tìm thấy mã này!"); }
         }
     }
     initData();
 </script>
 </body>
 </html>
-
-```
 
