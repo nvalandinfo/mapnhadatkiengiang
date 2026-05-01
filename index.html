@@ -141,11 +141,12 @@
 
 <script>
     // Định nghĩa các lớp bản đồ
-    // lyrs=s : Chỉ vệ tinh (Satellite only, no labels)
-    const satLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
-        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google Satellite'
+    // SỬ DỤNG ESRI WORLD IMAGERY ĐỂ GIỐNG BẢN ĐỒ SỐ 1 (KHÔNG TÊN ĐƯỜNG, MÀU ĐẸP)
+    const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri'
     });
-    // lyrs=m : Bản đồ đường phố (Standard roadmap)
+    
+    // Bản đồ đường phố tiêu chuẩn của Google
     const streetLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
         subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google Maps'
     });
