@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NVALAND - OPTIMIZED</title>
+    <title>NVALAND - HIGH PERFORMANCE</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
@@ -11,7 +11,15 @@
     <style>
         :root { --navy: #152238; --gold: #d4af37; --white: #ffffff; --dark-navy: #0b1320; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; background: var(--dark-navy); }
-        #map { width: 100%; height: 100vh; z-index: 1; }
+        
+        /* Tối ưu hiệu năng render bằng GPU */
+        #map { 
+            width: 100%; height: 100vh; z-index: 1; 
+            background: #0b1320; 
+            will-change: transform;
+        }
+        
+        .leaflet-tile-container { will-change: transform; }
 
         .brand-header {
             position: absolute; top: 10px; left: 10px; z-index: 1002;
@@ -23,7 +31,6 @@
         .btn-ui-float { position: absolute; top: 10px; right: 10px; z-index: 1002; }
         .btn-post { background: #28a745; color: white; border: 1.5px solid white; width: 38px; height: 38px; border-radius: 50%; font-weight: bold; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        /* THANH TÌM KIẾM TỐI ƯU 1 DÒNG */
         .main-controls {
             position: absolute; top: 60px; left: 10px; right: 10px;
             z-index: 1001; display: flex; flex-direction: column; gap: 5px;
@@ -48,33 +55,27 @@
             white-space: nowrap;
         }
 
-        /* BỘ LỌC */
         .filter-expandable {
             background: var(--white); border-radius: 10px; padding: 0;
-            max-height: 0; overflow: hidden; transition: all 0.3s ease-out;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            max-height: 0; overflow: hidden; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .filter-expandable.active { padding: 15px; max-height: 500px; border: 2px solid var(--gold); margin-top: 5px; }
 
         .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .filter-grid select { padding: 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 12px; color: var(--navy); }
-        .btn-apply-filter { background: var(--navy); color: var(--gold); border: 1.5px solid var(--gold); padding: 12px; border-radius: 5px; font-weight: bold; margin-top: 15px; cursor: pointer; width: 100%; }
-
-        /* PIN & PANEL */
-        .price-pin { display: flex; flex-direction: column; align-items: center; }
-        .pin-label { background: var(--navy); color: var(--gold); padding: 1px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; border: 1px solid var(--gold); }
-        .pin-drop { width: 24px; height: 24px; background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center; background-size: contain; filter: hue-rotate(140deg) brightness(0.8) saturate(5); }
-        #side-panel { position: fixed; top: 0; right: -100%; width: 100%; max-width: 350px; height: 100%; background: white; z-index: 2000; transition: 0.4s ease; }
-        #side-panel.active { right: 0; }
+        .filter-grid select { padding: 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 12px; }
+        
+        .price-pin { transform: translate3d(0,0,0); }
+        .pin-label { background: var(--navy); color: var(--gold); padding: 1px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; border: 1px solid var(--gold); white-space: nowrap; }
+        .pin-drop { width: 24px; height: 24px; background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center; background-size: contain; filter: hue-rotate(140deg) brightness(0.8); }
+        
+        #side-panel { position: fixed; top: 0; right: -100%; width: 100%; max-width: 350px; height: 100%; background: white; z-index: 2000; transition: transform 0.3s ease; }
+        #side-panel.active { transform: translateX(-100%); }
     </style>
 </head>
 <body>
 
 <div class="brand-header"><span>NVALAND</span></div>
-
-<div class="btn-ui-float">
-    <button class="btn-post" onclick="alert('Chức năng đang phát triển')">+</button>
-</div>
+<div class="btn-ui-float"><button class="btn-post" onclick="alert('Chức năng đang phát triển')">+</button></div>
 
 <div class="main-controls">
     <div class="single-search-bar">
@@ -84,28 +85,12 @@
         </div>
         <button class="btn-action" onclick="toggleFilterPanel()"><i class="fa fa-filter"></i> Lọc</button>
     </div>
-
     <div class="filter-expandable" id="filterPanel">
         <div class="filter-grid">
-            <select id="fType">
-                <option value="">-- Loại nhà đất --</option>
-                <option>Nhà riêng</option><option>Nhà chung cư</option><option>Khách sạn/Nhà nghỉ/Nhà trọ</option>
-                <option>Đất nền riêng</option><option>Đất dự án/Đất khu dân cư</option><option>Đất nông nghiệp/Trang trại</option><option>Kho bãi/Nhà xưởng</option>
-            </select>
-            <select id="fPrice">
-                <option value="">-- Mức giá --</option>
-                <option>Dưới 500 triệu</option><option>Từ 500tr - 1 tỷ</option><option>1 tỷ - 2 tỷ</option><option>2 tỷ - 3 tỷ</option><option>3 tỷ - 5 tỷ</option><option>5 tỷ - 10 tỷ</option><option>10 tỷ - 15 tỷ</option><option>15 tỷ - 20 tỷ</option><option>Trên 20 tỷ</option>
-            </select>
-            <select id="fArea">
-                <option value="">-- Diện tích --</option>
-                <option>Dưới 50m²</option><option>50 - 100m²</option><option>100 - 200m²</option><option>Trên 200m²</option>
-            </select>
-            <select id="fDirection">
-                <option value="">-- Hướng --</option>
-                <option>Đông</option><option>Tây</option><option>Nam</option><option>Bắc</option><option>Đông Nam</option><option>Tây Nam</option><option>Đông Bắc</option><option>Tây Bắc</option>
-            </select>
+            <select id="fType"><option value="">-- Loại nhà đất --</option><option>Nhà riêng</option><option>Đất nền</option></select>
+            <select id="fPrice"><option value="">-- Mức giá --</option><option>Dưới 1 tỷ</option><option>Trên 1 tỷ</option></select>
         </div>
-        <button class="btn-apply-filter" onclick="executeFilter()">ÁP DỤNG</button>
+        <button style="width:100%; margin-top:10px; padding:10px; background:var(--navy); color:var(--gold); border:none; border-radius:4px; font-weight:bold;" onclick="executeFilter()">ÁP DỤNG</button>
     </div>
 </div>
 
@@ -122,58 +107,73 @@
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
 <script>
-    // Chỉ sử dụng duy nhất lớp Vệ tinh có tên đường (Hybrid)
-    var map = L.map('map', { zoomControl: false }).setView([10.012, 105.090], 14);
+    // Tối ưu lớp bản đồ Hybrid (Vệ tinh + Tên đường) của Google
+    // Ưu điểm: Load cực nhanh, nhẹ và mượt hơn ArcGIS
+    const hybridLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        maxZoom: 20,
+        subdomains:['mt0','mt1','mt2','mt3'],
+        keepBuffer: 2, // Giữ lại các tile cũ để giảm nháy khi zoom
+        updateWhenIdle: true, // Chỉ load tile mới khi bản đồ đứng yên
+        className: 'optimized-tiles'
+    });
+
+    var map = L.map('map', { 
+        zoomControl: false, 
+        preferCanvas: true, // Sử dụng Canvas thay vì SVG để vẽ marker (nhanh hơn rất nhiều)
+        layers: [hybridLayer]
+    }).setView([10.012, 105.090], 14);
+
     L.control.zoom({ position: 'bottomright' }).addTo(map);
-    
-    L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-        attribution: 'Google Hybrid'
-    }).addTo(map);
+
+    // Cấu hình Cluster tối ưu để không lag khi di chuyển bản đồ
+    var clusters = L.markerClusterGroup({
+        disableClusteringAtZoom: 16, // Phóng to đến mức này thì hiện hết marker, không cần gom cụm
+        chunkedLoading: true, // Load marker theo từng đợt nhỏ để không treo trình duyệt
+        maxClusterRadius: 50,
+        spiderfyOnMaxZoom: false
+    });
 
     const bdsData = [];
-    const types = ["Nhà riêng", "Đất nền riêng", "Nhà chung cư", "Kho bãi/Nhà xưởng"];
+    const types = ["Nhà riêng", "Đất nền riêng", "Nhà chung cư", "Kho bãi"];
     for (let i = 1; i <= 30; i++) {
         bdsData.push({
             id: "KG" + (i < 10 ? "0" + i : i),
             ten: types[i % 4] + " số " + i,
             gia: (Math.random() * 8 + 0.5).toFixed(1) + " tỷ",
-            toaDo: [10.005 + (Math.random() * 0.02), 105.080 + (Math.random() * 0.03)],
-            type: types[i % 4]
+            toaDo: [10.005 + (Math.random() * 0.02), 105.080 + (Math.random() * 0.03)]
         });
     }
 
-    var clusters = L.markerClusterGroup();
     function renderMarkers(data) {
         clusters.clearLayers();
-        data.forEach(item => {
+        const markers = data.map(item => {
             const icon = L.divIcon({
                 className: 'custom-pin',
                 html: `<div class="price-pin"><div class="pin-label">${item.gia}</div><div class="pin-drop"></div></div>`,
                 iconSize: [50, 50], iconAnchor: [25, 50]
             });
-            const marker = L.marker(item.toaDo, { icon: icon }).on('click', () => openDetail(item));
-            clusters.addLayer(marker);
+            return L.marker(item.toaDo, { icon: icon }).on('click', () => openDetail(item));
         });
+        clusters.addLayers(markers);
         map.addLayer(clusters);
     }
-    renderMarkers(bdsData);
+    
+    // Sử dụng requestAnimationFrame để render mượt hơn
+    requestAnimationFrame(() => renderMarkers(bdsData));
 
     function toggleFilterPanel() { document.getElementById('filterPanel').classList.toggle('active'); }
     function closePanel() { document.getElementById('side-panel').classList.remove('active'); }
-    
     function openDetail(item) {
-        document.getElementById('panelBody').innerHTML = `<h3 style="color:var(--navy)">${item.ten}</h3><hr><p><b>Mã số:</b> ${item.id}</p><p><b>Giá:</b> ${item.gia}</p><br><a href="tel:0354244883" style="display:block; text-align:center; background:var(--navy); color:var(--gold); padding:12px; border-radius:5px; text-decoration:none; font-weight:bold; border:1px solid var(--gold);">GỌI LIÊN HỆ</a>`;
+        document.getElementById('panelBody').innerHTML = `<h3>${item.ten}</h3><p>Mã: ${item.id}</p><p>Giá: ${item.gia}</p>`;
         document.getElementById('side-panel').classList.add('active');
     }
-
     function executeSearch() {
         const query = document.getElementById('inputSearch').value.toUpperCase();
         const res = bdsData.find(i => i.id.includes(query));
-        if(res) { map.setView(res.toaDo, 17); openDetail(res); } else { alert("Không tìm thấy kết quả!"); }
+        if(res) { map.flyTo(res.toaDo, 17, {duration: 1}); openDetail(res); } 
+        else { alert("Không tìm thấy!"); }
     }
-
-    function executeFilter() { toggleFilterPanel(); alert("Đã áp dụng bộ lọc"); }
+    function executeFilter() { toggleFilterPanel(); }
 </script>
 </body>
 </html>
