@@ -7,12 +7,13 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
-        :root { --navy: #152238; --gold: #d4af37; --white: #ffffff; }
+        :root { --navy: #152238; --gold: #d4af37; --white: #ffffff; --blue: #007bff; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; background: #0b1320; }
         #map { width: 100%; height: 100vh; z-index: 1; }
 
-        /* LOGO - Chỉnh lại để không bị che */
+        /* BRAND HEADER */
         .brand-header {
             position: absolute; top: 10px; left: 10px; z-index: 1002;
             background: var(--navy); padding: 8px 12px; border-radius: 6px;
@@ -20,36 +21,38 @@
         }
         .brand-header span { color: var(--gold); font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* ĐIỀU KHIỂN - Thu nhỏ lại trên mobile */
+        /* MAIN CONTROLS - Giao diện giống ảnh 2 */
         .main-controls {
-            position: absolute; top: 10px; right: 10px; left: 110px; /* Chừa khoảng trống cho logo bên trái */
-            z-index: 1001; display: flex; flex-direction: column; gap: 5px;
+            position: absolute; top: 60px; left: 10px; right: 10px;
+            z-index: 1001; display: flex; flex-direction: column; gap: 8px;
+            background: rgba(255, 255, 255, 0.95); padding: 12px; border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); max-width: 450px;
         }
-        .search-row { display: flex; gap: 4px; align-items: center; justify-content: flex-end; }
         
-        .search-box {
-            flex: 1; max-width: 250px; /* Giới hạn độ rộng ô tìm kiếm */
-            background: white; border-radius: 20px; display: flex; align-items: center;
-            padding: 2px 10px; border: 1.5px solid var(--navy);
+        .search-row-top { display: flex; gap: 5px; margin-bottom: 5px; }
+        .search-box-custom {
+            flex: 1; background: white; border: 1px solid #ccc; border-radius: 4px;
+            display: flex; align-items: center; padding: 0 10px;
         }
-        .search-box input { border: none; flex: 1; outline: none; font-size: 13px; padding: 6px; width: 100%; }
-        
-        .btn-ui { 
-            background: var(--navy); color: var(--gold); border: 1px solid var(--gold); 
-            padding: 7px 12px; border-radius: 15px; font-weight: bold; cursor: pointer; 
-            font-size: 11px; white-space: nowrap;
-        }
-        .btn-post { background: #28a745; color: white; border-color: #fff; }
+        .search-box-custom input { border: none; flex: 1; outline: none; padding: 8px; font-size: 13px; }
+        .btn-search-red { background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 0 4px 4px 0; cursor: pointer; margin-right: -10px; }
 
-        /* BẢNG BỘ LỌC */
-        .filter-panel {
-            background: white; border-radius: 10px; padding: 12px; display: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-top: 3px solid var(--gold);
-            margin-top: 5px;
-        }
-        .filter-panel.active { display: block; }
+        .address-row { display: flex; gap: 5px; }
+        .address-row input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
+        .btn-go { background: var(--blue); color: white; border: none; padding: 8px 15px; border-radius: 4px; font-size: 12px; font-weight: bold; white-space: nowrap; }
+
+        /* BẢNG BỘ LỌC - Grid 2 cột */
+        .filter-section-title { font-size: 13px; font-weight: bold; color: var(--blue); margin: 10px 0 5px 0; }
         .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .filter-grid select { padding: 6px; border-radius: 4px; border: 1px solid #ccc; font-size: 12px; }
+        .filter-grid select { padding: 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 12px; background: white; }
+
+        .btn-apply-filter { 
+            background: var(--blue); color: white; border: none; padding: 10px; 
+            border-radius: 5px; font-weight: bold; margin-top: 10px; cursor: pointer; width: 100%;
+        }
+
+        .btn-ui-float { position: absolute; top: 10px; right: 10px; z-index: 1002; }
+        .btn-post { background: #28a745; color: white; border: 1px solid white; padding: 10px 15px; border-radius: 50%; font-weight: bold; font-size: 18px; cursor: pointer; }
 
         /* GHIM ĐỎ */
         .price-pin { display: flex; flex-direction: column; align-items: center; }
@@ -67,14 +70,12 @@
         /* SIDE PANEL */
         #side-panel {
             position: fixed; top: 0; right: -100%; width: 100%; max-width: 350px; height: 100%;
-            background: white; z-index: 2000; transition: 0.4s ease;
+            background: white; z-index: 2000; transition: 0.4s ease; box-shadow: -5px 0 15px rgba(0,0,0,0.1);
         }
         #side-panel.active { right: 0; }
 
         @media (max-width: 480px) {
-            .main-controls { left: 100px; } /* Thu hẹp thêm trên màn hình cực nhỏ */
-            .search-box { max-width: 150px; }
-            .btn-ui span { display: none; } /* Ẩn chữ nếu cần, chỉ để icon hoặc rút gọn */
+            .main-controls { top: 55px; left: 5px; right: 5px; }
         }
     </style>
 </head>
@@ -82,23 +83,71 @@
 
 <div class="brand-header"><span>NVALAND</span></div>
 
+<div class="btn-ui-float">
+    <button class="btn-post" onclick="alert('Đang phát triển chức năng đăng tin')">+</button>
+</div>
+
 <div class="main-controls">
-    <div class="search-row">
-        <div class="search-box">
-            <input type="text" id="inputSearch" placeholder="Tìm mã số...">
-            <button onclick="executeSearch()" style="background:none; border:none; cursor:pointer; font-size:12px;">🔍</button>
+    <div class="search-row-top">
+        <div class="search-box-custom">
+            <input type="text" id="inputSearch" placeholder="VD: KG00....">
+            <button class="btn-search-red" onclick="executeSearch()"><i class="fa fa-search"></i></button>
         </div>
-        <button class="btn-ui" onclick="toggleFilter()">Lọc</button>
-        <button class="btn-ui btn-post" onclick="alert('Đang phát triển')">+</button>
     </div>
 
-    <div class="filter-panel" id="filterPanel">
-        <div class="filter-grid">
-            <select id="fType"><option value="">Loại hình</option><option value="Đất nền">Đất nền</option><option value="Nhà phố">Nhà phố</option></select>
-            <select id="fPrice"><option value="">Giá</option><option value="1">< 2 tỷ</option><option value="2">2-5 tỷ</option></select>
-        </div>
-        <button class="btn-ui" style="width:100%; margin-top:8px;" onclick="executeFilter()">Áp dụng</button>
+    <div class="address-row">
+        <input type="text" id="inputAddress" placeholder="VD: Rạch Giá, An Giang">
+        <button class="btn-go">Di chuyển <i class="fa fa-paper-plane"></i></button>
     </div>
+
+    <div class="filter-section-title"><i class="fa fa-filter"></i> Lọc theo các tiêu chí:</div>
+    <div class="filter-grid">
+        <select id="fType">
+            <option value="">-- Loại nhà đất --</option>
+            <option>Nhà riêng</option>
+            <option>Nhà chung cư</option>
+            <option>Khách sạn/Nhà nghỉ/Nhà trọ</option>
+            <option>Đất nền riêng</option>
+            <option>Đất dự án/Đất khu dân cư</option>
+            <option>Đất nông nghiệp/Trang trại</option>
+            <option>Kho bãi/Nhà xưởng</option>
+        </select>
+
+        <select id="fPrice">
+            <option value="">-- Mức giá --</option>
+            <option>Dưới 500 triệu</option>
+            <option>Từ 500tr - 1 tỷ</option>
+            <option>1 tỷ - 2 tỷ</option>
+            <option>2 tỷ - 3 tỷ</option>
+            <option>3 tỷ - 5 tỷ</option>
+            <option>5 tỷ - 10 tỷ</option>
+            <option>10 tỷ - 15 tỷ</option>
+            <option>15 tỷ - 20 tỷ</option>
+            <option>Trên 20 tỷ</option>
+        </select>
+
+        <select id="fArea">
+            <option value="">-- Diện tích --</option>
+            <option>Dưới 50m²</option>
+            <option>50 - 100m²</option>
+            <option>100 - 200m²</option>
+            <option>Trên 200m²</option>
+        </select>
+
+        <select id="fDirection">
+            <option value="">-- Hướng --</option>
+            <option>Đông</option>
+            <option>Tây</option>
+            <option>Nam</option>
+            <option>Bắc</option>
+            <option>Đông Nam</option>
+            <option>Tây Nam</option>
+            <option>Đông Bắc</option>
+            <option>Tây Bắc</option>
+        </select>
+    </div>
+    
+    <button class="btn-apply-filter" onclick="executeFilter()">Áp dụng lọc</button>
 </div>
 
 <div id="side-panel">
@@ -118,15 +167,16 @@
     L.control.zoom({ position: 'bottomright' }).addTo(map);
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
 
+    // Dữ liệu mẫu mở rộng
     const bdsData = [];
-    const types = ["Đất nền", "Nhà phố", "Biệt thự"];
+    const types = ["Nhà riêng", "Đất nền riêng", "Nhà chung cư", "Kho bãi/Nhà xưởng"];
     for (let i = 1; i <= 30; i++) {
         bdsData.push({
-            id: "RG" + (i < 10 ? "0" + i : i),
-            ten: types[i % 3] + " số " + i,
-            gia: (Math.random() * 8 + 1).toFixed(1) + " tỷ",
+            id: "KG" + (i < 10 ? "0" + i : i),
+            ten: types[i % 4] + " khu vực " + i,
+            gia: (Math.random() * 8 + 0.5).toFixed(1) + " tỷ",
             toaDo: [10.005 + (Math.random() * 0.02), 105.080 + (Math.random() * 0.03)],
-            type: types[i % 3]
+            type: types[i % 4]
         });
     }
 
@@ -146,17 +196,47 @@
     }
     renderMarkers(bdsData);
 
-    function toggleFilter() { document.getElementById('filterPanel').classList.toggle('active'); }
     function closePanel() { document.getElementById('side-panel').classList.remove('active'); }
+    
     function openDetail(item) {
-        document.getElementById('panelBody').innerHTML = `<h3>${item.ten}</h3><p>Mã: ${item.id}</p><p>Giá: ${item.gia}</p><a href="tel:0354244883" class="btn-ui" style="display:block; text-align:center;">Gọi ngay</a>`;
+        document.getElementById('panelBody').innerHTML = `
+            <h3 style="color:var(--navy)">${item.ten}</h3>
+            <hr>
+            <p><b>Mã số:</b> <span style="color:red">${item.id}</span></p>
+            <p><b>Loại hình:</b> ${item.type}</p>
+            <p><b>Giá:</b> <span style="font-weight:bold; color:green">${item.gia}</span></p>
+            <p><b>Vị trí:</b> Rạch Giá, Kiên Giang</p>
+            <br>
+            <a href="tel:0354244883" style="display:block; text-align:center; background:var(--blue); color:white; padding:12px; border-radius:5px; text-decoration:none; font-weight:bold;">LIÊN HỆ NGAY</a>
+        `;
         document.getElementById('side-panel').classList.add('active');
     }
+
     function executeSearch() {
         const query = document.getElementById('inputSearch').value.toUpperCase();
-        const res = bdsData.find(i => i.id === query);
-        if(res) openDetail(res); else alert("Không thấy!");
+        if(!query) return alert("Vui lòng nhập mã!");
+        const res = bdsData.find(i => i.id.includes(query));
+        if(res) {
+            map.setView(res.toaDo, 17);
+            openDetail(res);
+        } else {
+            alert("Không tìm thấy bất động sản với mã này!");
+        }
+    }
+
+    function executeFilter() {
+        // Chức năng lọc logic sẽ được tích hợp dựa trên database của bạn
+        alert("Đã áp dụng bộ lọc. Đang tìm kiếm kết quả phù hợp...");
+        // Ví dụ lọc theo loại hình
+        const selectedType = document.getElementById('fType').value;
+        if(selectedType) {
+            const filtered = bdsData.filter(item => item.type === selectedType);
+            renderMarkers(filtered);
+        } else {
+            renderMarkers(bdsData);
+        }
     }
 </script>
 </body>
 </html>
+
