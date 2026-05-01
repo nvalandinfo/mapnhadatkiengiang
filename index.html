@@ -60,18 +60,6 @@
         .filter-grid select { padding: 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 12px; color: var(--navy); }
         .btn-apply-filter { background: var(--navy); color: var(--gold); border: 1.5px solid var(--gold); padding: 12px; border-radius: 5px; font-weight: bold; margin-top: 15px; cursor: pointer; width: 100%; }
 
-        /* NÚT CHỌN BẢN ĐỒ */
-        .map-layer-control {
-            position: absolute; bottom: 80px; left: 10px; z-index: 1002;
-            display: flex; flex-direction: column; gap: 5px;
-        }
-        .btn-layer {
-            background: white; border: 2px solid var(--navy); color: var(--navy);
-            padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 12px;
-            font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.2); text-align: center;
-        }
-        .btn-layer.active { background: var(--navy); color: var(--gold); border-color: var(--gold); }
-
         /* PIN & PANEL */
         .price-pin { display: flex; flex-direction: column; align-items: center; }
         .pin-label { background: var(--navy); color: var(--gold); padding: 1px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; border: 1px solid var(--gold); }
@@ -121,12 +109,6 @@
     </div>
 </div>
 
-<!-- NÚT CHUYỂN ĐỔI BẢN ĐỒ -->
-<div class="map-layer-control">
-    <button class="btn-layer active" id="btnSat" onclick="setLayer('sat')">Vệ tinh</button>
-    <button class="btn-layer" id="btnStreet" onclick="setLayer('street')">Tên đường</button>
-</div>
-
 <div id="side-panel">
     <div style="padding:20px;">
         <span onclick="closePanel()" style="float:right; font-size:25px; cursor:pointer;">✕</span>
@@ -140,34 +122,14 @@
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
 <script>
-    // Định nghĩa các lớp bản đồ
-    const satLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
-        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google Satellite'
-    });
-    const streetLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
-        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'], attribution: 'Google Maps'
-    });
-
-    var map = L.map('map', { 
-        zoomControl: false, 
-        layers: [satLayer] 
-    }).setView([10.012, 105.090], 14);
-
+    // Chỉ sử dụng duy nhất lớp Vệ tinh có tên đường (Hybrid)
+    var map = L.map('map', { zoomControl: false }).setView([10.012, 105.090], 14);
     L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-    function setLayer(type) {
-        if(type === 'sat') {
-            map.addLayer(satLayer);
-            map.removeLayer(streetLayer);
-            document.getElementById('btnSat').classList.add('active');
-            document.getElementById('btnStreet').classList.remove('active');
-        } else {
-            map.addLayer(streetLayer);
-            map.removeLayer(satLayer);
-            document.getElementById('btnStreet').classList.add('active');
-            document.getElementById('btnSat').classList.remove('active');
-        }
-    }
+    
+    L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+        attribution: 'Google Hybrid'
+    }).addTo(map);
 
     const bdsData = [];
     const types = ["Nhà riêng", "Đất nền riêng", "Nhà chung cư", "Kho bãi/Nhà xưởng"];
