@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NVALAND - OPTIMIZED</title>
+    <title>NVALAND - MAP OPTIONS</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
@@ -13,52 +13,38 @@
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; background: var(--dark-navy); }
         #map { width: 100%; height: 100vh; z-index: 1; }
 
-        .brand-header {
-            position: absolute; top: 10px; left: 10px; z-index: 1002;
-            background: var(--navy); padding: 8px 12px; border-radius: 6px;
-            border: 1.5px solid var(--gold); box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
+        /* BRAND & POST BUTTON */
+        .brand-header { position: absolute; top: 10px; left: 10px; z-index: 1002; background: var(--navy); padding: 8px 12px; border-radius: 6px; border: 1.5px solid var(--gold); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
         .brand-header span { color: var(--gold); font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
-
         .btn-ui-float { position: absolute; top: 10px; right: 10px; z-index: 1002; }
         .btn-post { background: #28a745; color: white; border: 1.5px solid white; width: 38px; height: 38px; border-radius: 50%; font-weight: bold; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        /* THANH TÌM KIẾM TỐI ƯU 1 DÒNG */
-        .main-controls {
-            position: absolute; top: 60px; left: 10px; right: 10px;
-            z-index: 1001; display: flex; flex-direction: column; gap: 5px;
-            max-width: 500px;
-        }
-        
-        .single-search-bar {
-            background: var(--navy); padding: 6px; border-radius: 8px;
-            border: 1px solid var(--gold); box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            display: flex; gap: 5px; align-items: center;
-        }
-
-        .input-wrapper {
-            flex: 1; background: white; border-radius: 4px;
-            display: flex; align-items: center; padding: 0 8px; border: 1px solid var(--gold);
-        }
+        /* SEARCH BAR 1 LINE */
+        .main-controls { position: absolute; top: 60px; left: 10px; right: 10px; z-index: 1001; display: flex; flex-direction: column; gap: 5px; max-width: 500px; }
+        .single-search-bar { background: var(--navy); padding: 6px; border-radius: 8px; border: 1px solid var(--gold); box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; gap: 5px; align-items: center; }
+        .input-wrapper { flex: 1; background: white; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; border: 1px solid var(--gold); }
         .input-wrapper input { border: none; flex: 1; outline: none; padding: 8px; font-size: 13px; width: 100%; }
-        
-        .btn-action { 
-            background: var(--navy); color: var(--gold); border: 1px solid var(--gold); 
-            padding: 8px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px;
-            white-space: nowrap;
-        }
+        .btn-action { background: var(--navy); color: var(--gold); border: 1px solid var(--gold); padding: 8px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; white-space: nowrap; }
 
-        /* BỘ LỌC */
-        .filter-expandable {
-            background: var(--white); border-radius: 10px; padding: 0;
-            max-height: 0; overflow: hidden; transition: all 0.3s ease-out;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
+        /* FILTER PANEL */
+        .filter-expandable { background: var(--white); border-radius: 10px; padding: 0; max-height: 0; overflow: hidden; transition: all 0.3s ease-out; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .filter-expandable.active { padding: 15px; max-height: 500px; border: 2px solid var(--gold); margin-top: 5px; }
-
         .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .filter-grid select { padding: 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 12px; color: var(--navy); }
         .btn-apply-filter { background: var(--navy); color: var(--gold); border: 1.5px solid var(--gold); padding: 12px; border-radius: 5px; font-weight: bold; margin-top: 15px; cursor: pointer; width: 100%; }
+
+        /* CHỌN CHẾ ĐỘ BẢN ĐỒ (MỚI) */
+        .map-layer-control {
+            position: absolute; bottom: 80px; left: 10px; z-index: 1002;
+            display: flex; flex-direction: column; gap: 5px;
+        }
+        .btn-layer {
+            background: white; border: 2px solid var(--navy); color: var(--navy);
+            padding: 8px; border-radius: 8px; cursor: pointer; font-size: 12px;
+            font-weight: bold; display: flex; align-items: center; gap: 5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .btn-layer.active { background: var(--navy); color: var(--gold); border-color: var(--gold); }
 
         /* PIN & PANEL */
         .price-pin { display: flex; flex-direction: column; align-items: center; }
@@ -109,6 +95,16 @@
     </div>
 </div>
 
+<!-- NÚT CHỌN CHẾ ĐỘ BẢN ĐỒ -->
+<div class="map-layer-control">
+    <button class="btn-layer active" id="btnSatellite" onclick="switchLayer('satellite')">
+        <i class="fa fa-globe"></i> Vệ tinh
+    </button>
+    <button class="btn-layer" id="btnStreet" onclick="switchLayer('street')">
+        <i class="fa fa-road"></i> Tên đường
+    </button>
+</div>
+
 <div id="side-panel">
     <div style="padding:20px;">
         <span onclick="closePanel()" style="float:right; font-size:25px; cursor:pointer;">✕</span>
@@ -122,10 +118,33 @@
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
 <script>
-    var map = L.map('map', { zoomControl: false }).setView([10.012, 105.090], 14);
-    L.control.zoom({ position: 'bottomright' }).addTo(map);
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
+    // Định nghĩa các lớp bản đồ
+    var satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+    var streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{y}/{x}.png');
 
+    var map = L.map('map', { 
+        zoomControl: false,
+        layers: [satelliteLayer] // Mặc định là vệ tinh
+    }).setView([10.012, 105.090], 14);
+
+    L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    // Hàm chuyển lớp bản đồ
+    function switchLayer(type) {
+        if (type === 'satellite') {
+            map.removeLayer(streetLayer);
+            map.addLayer(satelliteLayer);
+            document.getElementById('btnSatellite').classList.add('active');
+            document.getElementById('btnStreet').classList.remove('active');
+        } else {
+            map.removeLayer(satelliteLayer);
+            map.addLayer(streetLayer);
+            document.getElementById('btnStreet').classList.add('active');
+            document.getElementById('btnSatellite').classList.remove('active');
+        }
+    }
+
+    // Dữ liệu và Marker giữ nguyên
     const bdsData = [];
     const types = ["Nhà riêng", "Đất nền riêng", "Nhà chung cư", "Kho bãi/Nhà xưởng"];
     for (let i = 1; i <= 30; i++) {
@@ -158,7 +177,7 @@
     function closePanel() { document.getElementById('side-panel').classList.remove('active'); }
     
     function openDetail(item) {
-        document.getElementById('panelBody').innerHTML = `<h3 style="color:var(--navy)">${item.ten}</h3><hr><p><b>Mã số:</b> ${item.id}</p><p><b>Giá:</b> ${item.gia}</p><br><a href="tel:0354244883" style="display:block; text-align:center; background:var(--navy); color:var(--gold); padding:12px; border-radius:5px; text-decoration:none; font-weight:bold; border:1px solid var(--gold);">GỌI: 0354 244 883</a>`;
+        document.getElementById('panelBody').innerHTML = `<h3 style="color:var(--navy)">${item.ten}</h3><hr><p><b>Mã số:</b> ${item.id}</p><p><b>Giá:</b> ${item.gia}</p><br><a href="tel:0354244883" style="display:block; text-align:center; background:var(--navy); color:var(--gold); padding:12px; border-radius:5px; text-decoration:none; font-weight:bold; border:1px solid var(--gold);">GỌI 0354 244 883</a>`;
         document.getElementById('side-panel').classList.add('active');
     }
 
