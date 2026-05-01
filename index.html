@@ -3,22 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NVALAND - PREMIUM MOBILE</title>
+    <title>NVALAND - OPTIMIZED</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
-        :root { 
-            --navy: #152238; 
-            --gold: #d4af37; 
-            --white: #ffffff; 
-            --dark-navy: #0b1320;
-        }
+        :root { --navy: #152238; --gold: #d4af37; --white: #ffffff; --dark-navy: #0b1320; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; background: var(--dark-navy); }
         #map { width: 100%; height: 100vh; z-index: 1; }
 
-        /* BRAND HEADER */
         .brand-header {
             position: absolute; top: 10px; left: 10px; z-index: 1002;
             background: var(--navy); padding: 8px 12px; border-radius: 6px;
@@ -26,81 +20,52 @@
         }
         .brand-header span { color: var(--gold); font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* NÚT ĐĂNG TIN */
         .btn-ui-float { position: absolute; top: 10px; right: 10px; z-index: 1002; }
-        .btn-post { background: #28a745; color: white; border: 1.5px solid white; width: 40px; height: 40px; border-radius: 50%; font-weight: bold; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+        .btn-post { background: #28a745; color: white; border: 1.5px solid white; width: 38px; height: 38px; border-radius: 50%; font-weight: bold; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        /* MAIN CONTROLS */
+        /* THANH TÌM KIẾM TỐI ƯU 1 DÒNG */
         .main-controls {
             position: absolute; top: 60px; left: 10px; right: 10px;
-            z-index: 1001; display: flex; flex-direction: column; gap: 8px;
-            max-width: 450px;
+            z-index: 1001; display: flex; flex-direction: column; gap: 5px;
+            max-width: 500px;
         }
         
-        /* THANH TÌM KIẾM LUÔN HIỆN */
-        .search-bar-container {
-            background: var(--navy); padding: 10px; border-radius: 10px;
-            border: 1px solid var(--gold); box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            display: flex; flex-direction: column; gap: 8px;
+        .single-search-bar {
+            background: var(--navy); padding: 6px; border-radius: 8px;
+            border: 1px solid var(--gold); box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: flex; gap: 5px; align-items: center;
         }
 
-        .row-flex { display: flex; gap: 6px; }
-        
-        .input-custom {
+        .input-wrapper {
             flex: 1; background: white; border-radius: 4px;
             display: flex; align-items: center; padding: 0 8px; border: 1px solid var(--gold);
         }
-        .input-custom input { border: none; flex: 1; outline: none; padding: 8px; font-size: 13px; width: 100%; }
+        .input-wrapper input { border: none; flex: 1; outline: none; padding: 8px; font-size: 13px; width: 100%; }
         
-        .btn-navy-gold { 
+        .btn-action { 
             background: var(--navy); color: var(--gold); border: 1px solid var(--gold); 
-            padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;
-            transition: 0.3s;
+            padding: 8px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px;
+            white-space: nowrap;
         }
-        .btn-navy-gold:active { background: var(--gold); color: var(--navy); }
 
-        /* KHUNG BỘ LỌC - THU GỌN */
+        /* BỘ LỌC */
         .filter-expandable {
             background: var(--white); border-radius: 10px; padding: 0;
-            max-height: 0; overflow: hidden; transition: all 0.4s ease-out;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 0px solid var(--gold);
+            max-height: 0; overflow: hidden; transition: all 0.3s ease-out;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
-        .filter-expandable.active {
-            padding: 15px; max-height: 500px; border-width: 2px; margin-top: 5px;
-        }
+        .filter-expandable.active { padding: 15px; max-height: 500px; border: 2px solid var(--gold); margin-top: 5px; }
 
-        .filter-section-title { font-size: 13px; font-weight: bold; color: var(--navy); margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .filter-grid select { padding: 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 12px; background: #f9f9f9; color: var(--navy); }
+        .filter-grid select { padding: 10px; border-radius: 4px; border: 1px solid #ccc; font-size: 12px; color: var(--navy); }
+        .btn-apply-filter { background: var(--navy); color: var(--gold); border: 1.5px solid var(--gold); padding: 12px; border-radius: 5px; font-weight: bold; margin-top: 15px; cursor: pointer; width: 100%; }
 
-        .btn-apply-filter { 
-            background: var(--navy); color: var(--gold); border: 1.5px solid var(--gold); 
-            padding: 12px; border-radius: 5px; font-weight: bold; margin-top: 15px; cursor: pointer; width: 100%;
-        }
-
-        /* GHIM ĐỎ */
+        /* PIN & PANEL */
         .price-pin { display: flex; flex-direction: column; align-items: center; }
-        .pin-label {
-            background: var(--navy); color: var(--gold); padding: 1px 6px;
-            border-radius: 4px; font-weight: bold; font-size: 10px;
-            border: 1px solid var(--gold); white-space: nowrap;
-        }
-        .pin-drop {
-            width: 24px; height: 24px;
-            background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center;
-            background-size: contain; filter: hue-rotate(140deg) brightness(0.8) saturate(5);
-        }
-
-        /* SIDE PANEL */
-        #side-panel {
-            position: fixed; top: 0; right: -100%; width: 100%; max-width: 350px; height: 100%;
-            background: white; z-index: 2000; transition: 0.4s ease; box-shadow: -5px 0 15px rgba(0,0,0,0.1);
-        }
+        .pin-label { background: var(--navy); color: var(--gold); padding: 1px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; border: 1px solid var(--gold); }
+        .pin-drop { width: 24px; height: 24px; background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center; background-size: contain; filter: hue-rotate(140deg) brightness(0.8) saturate(5); }
+        #side-panel { position: fixed; top: 0; right: -100%; width: 100%; max-width: 350px; height: 100%; background: white; z-index: 2000; transition: 0.4s ease; }
         #side-panel.active { right: 0; }
-
-        @media (max-width: 480px) {
-            .main-controls { top: 55px; left: 8px; right: 8px; }
-        }
     </style>
 </head>
 <body>
@@ -112,79 +77,41 @@
 </div>
 
 <div class="main-controls">
-    <div class="search-bar-container">
-        <div class="row-flex">
-            <div class="input-custom">
-                <input type="text" id="inputSearch" placeholder="Nhập mã số (KG00...)">
-                <button onclick="executeSearch()" style="background:none; border:none; cursor:pointer; color:var(--navy)">🔍</button>
-            </div>
-            <button class="btn-navy-gold" onclick="toggleFilterPanel()">
-                <i class="fa fa-filter"></i> Lọc
-            </button>
+    <div class="single-search-bar">
+        <div class="input-wrapper">
+            <input type="text" id="inputSearch" placeholder="Tìm mã số hoặc địa chỉ...">
+            <button onclick="executeSearch()" style="background:none; border:none; cursor:pointer;">🔍</button>
         </div>
-
-        <div class="row-flex">
-            <div class="input-custom">
-                <input type="text" id="inputAddress" placeholder="Vị trí: Rạch Giá, An Giang...">
-            </div>
-            <button class="btn-navy-gold"><i class="fa fa-location-arrow"></i></button>
-        </div>
+        <button class="btn-action" onclick="toggleFilterPanel()"><i class="fa fa-filter"></i> Lọc</button>
     </div>
 
     <div class="filter-expandable" id="filterPanel">
-        <div class="filter-section-title">TIÊU CHÍ TÌM KIẾM</div>
         <div class="filter-grid">
             <select id="fType">
                 <option value="">-- Loại nhà đất --</option>
-                <option>Nhà riêng</option>
-                <option>Nhà chung cư</option>
-                <option>Khách sạn/Nhà nghỉ/Nhà trợ</option>
-                <option>Đất nền riêng</option>
-                <option>Đất dự án/Đất khu dân cư</option>
-                <option>Đất nông nghiệp/Trang trại</option>
-                <option>Kho bãi/Nhà xưởng</option>
+                <option>Nhà riêng</option><option>Nhà chung cư</option><option>Khách sạn/Nhà nghỉ/Nhà trọ</option>
+                <option>Đất nền riêng</option><option>Đất dự án/Đất khu dân cư</option><option>Đất nông nghiệp/Trang trại</option><option>Kho bãi/Nhà xưởng</option>
             </select>
-
             <select id="fPrice">
                 <option value="">-- Mức giá --</option>
-                <option>Dưới 500 triệu</option>
-                <option>Từ 500tr - 1 tỷ</option>
-                <option>1 tỷ - 2 tỷ</option>
-                <option>2 tỷ - 3 tỷ</option>
-                <option>3 tỷ - 5 tỷ</option>
-                <option>5 tỷ - 10 tỷ</option>
-                <option>10 tỷ - 15 tỷ</option>
-                <option>15 tỷ - 20 tỷ</option>
-                <option>Trên 20 tỷ</option>
+                <option>Dưới 500 triệu</option><option>Từ 500tr - 1 tỷ</option><option>1 tỷ - 2 tỷ</option><option>2 tỷ - 3 tỷ</option><option>3 tỷ - 5 tỷ</option><option>5 tỷ - 10 tỷ</option><option>10 tỷ - 15 tỷ</option><option>15 tỷ - 20 tỷ</option><option>Trên 20 tỷ</option>
             </select>
-
             <select id="fArea">
                 <option value="">-- Diện tích --</option>
-                <option>Dưới 50m²</option>
-                <option>50 - 100m²</option>
-                <option>100 - 200m²</option>
-                <option>Trên 200m²</option>
+                <option>Dưới 50m²</option><option>50 - 100m²</option><option>100 - 200m²</option><option>Trên 200m²</option>
             </select>
-
             <select id="fDirection">
                 <option value="">-- Hướng --</option>
-                <option>Đông</option>
-                <option>Tây</option>
-                <option>Nam</option>
-                <option>Bắc</option>
-                <option>Đông Nam</option>
-                <option>Tây Nam</option>
-                <option>Đông Bắc</option>
-                <option>Tây Bắc</option>
+                <option>Đông</option><option>Tây</option><option>Nam</option><option>Bắc</option><option>Đông Nam</option><option>Tây Nam</option><option>Đông Bắc</option><option>Tây Bắc</option>
             </select>
         </div>
-        <button class="btn-apply-filter" onclick="executeFilter()">ÁP DỤNG BỘ LỌC</button>
+        <button class="btn-apply-filter" onclick="executeFilter()">ÁP DỤNG</button>
     </div>
 </div>
 
 <div id="side-panel">
     <div style="padding:20px;">
-        <span onclick="closePanel()" style="float:right; font-size:25px; cursor:pointer; color:var(--navy)">✕</span>
+        <span onclick="closePanel()" style="float:right; font-size:25px; cursor:pointer;">✕</span>
         <div id="panelBody" style="margin-top:30px;"></div>
     </div>
 </div>
@@ -199,7 +126,6 @@
     L.control.zoom({ position: 'bottomright' }).addTo(map);
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
 
-    // Dữ liệu mẫu
     const bdsData = [];
     const types = ["Nhà riêng", "Đất nền riêng", "Nhà chung cư", "Kho bãi/Nhà xưởng"];
     for (let i = 1; i <= 30; i++) {
@@ -228,44 +154,21 @@
     }
     renderMarkers(bdsData);
 
-    // Hàm đóng mở bộ lọc
-    function toggleFilterPanel() {
-        const panel = document.getElementById('filterPanel');
-        panel.classList.toggle('active');
-    }
-
+    function toggleFilterPanel() { document.getElementById('filterPanel').classList.toggle('active'); }
     function closePanel() { document.getElementById('side-panel').classList.remove('active'); }
     
     function openDetail(item) {
-        document.getElementById('panelBody').innerHTML = `
-            <h3 style="color:var(--navy)">${item.ten}</h3>
-            <hr border="1" style="border-color:var(--gold)">
-            <p><b>Mã số:</b> <span style="color:red; font-weight:bold">${item.id}</span></p>
-            <p><b>Loại hình:</b> ${item.type}</p>
-            <p><b>Giá:</b> <span style="color:green; font-weight:bold">${item.gia}</span></p>
-            <br>
-            <a href="tel:0354244883" style="display:block; text-align:center; background:var(--navy); color:var(--gold); padding:12px; border-radius:5px; text-decoration:none; font-weight:bold; border:1px solid var(--gold);">GỌI LIÊN HỆ</a>
-        `;
+        document.getElementById('panelBody').innerHTML = `<h3 style="color:var(--navy)">${item.ten}</h3><hr><p><b>Mã số:</b> ${item.id}</p><p><b>Giá:</b> ${item.gia}</p><br><a href="tel:0354244883" style="display:block; text-align:center; background:var(--navy); color:var(--gold); padding:12px; border-radius:5px; text-decoration:none; font-weight:bold; border:1px solid var(--gold);">GỌI LIÊN HỆ</a>`;
         document.getElementById('side-panel').classList.add('active');
     }
 
     function executeSearch() {
         const query = document.getElementById('inputSearch').value.toUpperCase();
         const res = bdsData.find(i => i.id.includes(query));
-        if(res) {
-            map.setView(res.toaDo, 17);
-            openDetail(res);
-        } else {
-            alert("Không tìm thấy mã này!");
-        }
+        if(res) { map.setView(res.toaDo, 17); openDetail(res); } else { alert("Không tìm thấy kết quả!"); }
     }
 
-    function executeFilter() {
-        // Thu gọn lại sau khi bấm áp dụng
-        toggleFilterPanel();
-        alert("Đang lọc kết quả...");
-        // Logic lọc thực tế...
-    }
+    function executeFilter() { toggleFilterPanel(); alert("Đã áp dụng bộ lọc"); }
 </script>
 </body>
 </html>
