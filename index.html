@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NVALAND - FIX SIDEBAR</title>
+    <title>NVALAND - LISTING OPTIMIZED</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
@@ -12,91 +12,97 @@
         :root { --navy: #152238; --gold: #d4af37; --white: #ffffff; --dark-navy: #0b1320; --gray: #f4f4f4; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; background: var(--dark-navy); }
         
+        /* Bố cục chính: Cột trái + Bản đồ */
         .main-container { display: flex; width: 100%; height: 100vh; }
 
-        /* Cột sản phẩm bên trái */
+        /* Cột sản phẩm bên trái (1/5 màn hình trên Desktop) */
         .side-listing { 
-            width: 20%; min-width: 280px; height: 100%; 
+            width: 20%; min-width: 250px; height: 100%; 
             background: var(--white); border-right: 2px solid var(--gold);
             display: flex; flex-direction: column; z-index: 1005;
             transition: all 0.3s ease;
         }
         
+        /* Header có nút X đóng */
         .listing-header { 
             background: var(--navy); color: var(--gold); padding: 15px; 
             font-weight: bold; text-align: center; font-size: 14px; 
             text-transform: uppercase; border-bottom: 2px solid var(--gold);
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex; justify-content: center; align-items: center; position: relative;
         }
-
-        /* Nút đóng danh sách trên Mobile */
-        .btn-close-list { display: none; background: none; border: none; color: var(--gold); font-size: 20px; cursor: pointer; }
+        .btn-close-list {
+            position: absolute; right: 10px; background: none; border: none;
+            color: var(--gold); font-size: 20px; cursor: pointer; display: none;
+        }
 
         .listing-content { flex: 1; overflow-y: auto; background: var(--gray); padding: 10px; }
         
+        /* Card sản phẩm trong danh sách */
         .product-card { 
-            background: white; border-radius: 6px; padding: 12px; margin-bottom: 10px;
+            background: white; border-radius: 6px; padding: 10px; margin-bottom: 10px;
             border-left: 4px solid var(--gold); cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: 0.2s;
         }
+        .product-card:hover { background: #fff9e6; transform: translateX(5px); }
         .product-card h4 { margin: 0 0 5px 0; font-size: 13px; color: var(--navy); }
-        .product-card .price-tag { color: #d32f2f; font-weight: bold; font-size: 13px; }
+        .product-card p { margin: 2px 0; font-size: 11px; color: #555; }
+        .product-card .price-tag { color: #d32f2f; font-weight: bold; font-size: 12px; }
 
+        /* Vùng bản đồ chiếm 4/5 */
         #map-wrapper { flex: 1; position: relative; height: 100%; }
         #map { width: 100%; height: 100%; z-index: 1; }
 
+        /* Các UI nổi trên bản đồ */
         .brand-header { position: absolute; top: 10px; left: 10px; z-index: 1002; background: var(--navy); padding: 8px 12px; border-radius: 6px; border: 1.5px solid var(--gold); }
         .brand-header span { color: var(--gold); font-size: 14px; font-weight: 800; text-transform: uppercase; }
-        
         .btn-ui-float { position: absolute; top: 10px; right: 10px; z-index: 1002; }
-        .btn-post { background: #28a745; color: white; border: 1.5px solid white; width: 40px; height: 40px; border-radius: 50%; font-weight: bold; font-size: 22px; cursor: pointer; }
+        .btn-post { background: #28a745; color: white; border: 1.5px solid white; width: 38px; height: 38px; border-radius: 50%; font-weight: bold; font-size: 20px; cursor: pointer; }
 
         .main-controls { position: absolute; top: 60px; left: 10px; right: 10px; z-index: 1001; max-width: 450px; }
-        .single-search-bar { background: var(--navy); padding: 6px; border-radius: 8px; border: 1px solid var(--gold); display: flex; gap: 5px; }
+        .single-search-bar { background: var(--navy); padding: 6px; border-radius: 8px; border: 1px solid var(--gold); display: flex; gap: 5px; align-items: center; }
         .input-wrapper { flex: 1; background: white; border-radius: 4px; display: flex; padding: 0 8px; border: 1px solid var(--gold); }
-        .input-wrapper input { border: none; flex: 1; outline: none; padding: 8px; font-size: 14px; width: 100%; }
+        .input-wrapper input { border: none; flex: 1; outline: none; padding: 8px; font-size: 13px; width: 100%; }
         
         .map-layer-control { position: absolute; bottom: 80px; left: 10px; z-index: 1002; display: flex; flex-direction: column; gap: 5px; }
-        .btn-layer { background: white; border: 2px solid var(--navy); color: var(--navy); padding: 10px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; }
+        .btn-layer { background: white; border: 2px solid var(--navy); color: var(--navy); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; }
         .btn-layer.active { background: var(--navy); color: var(--gold); border-color: var(--gold); }
 
-        /* Mobile Optimization */
+        /* Responsive cho Mobile */
         @media (max-width: 768px) {
-            .side-listing { position: fixed; left: -100%; width: 85%; height: 100%; box-shadow: 5px 0 15px rgba(0,0,0,0.3); }
+            .side-listing { position: fixed; left: -100%; width: 80%; height: 100%; }
             .side-listing.mobile-active { left: 0; }
-            .btn-close-list { display: block; }
-            .btn-toggle-list { 
-                position: absolute; bottom: 150px; left: 10px; z-index: 1003; 
-                background: var(--navy); color: var(--gold); border: 2px solid var(--gold); 
-                width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-size: 18px;
-            }
+            .btn-close-list { display: block; } /* Hiện nút X trên mobile */
+            .btn-toggle-list { position: absolute; bottom: 140px; left: 10px; z-index: 1003; background: var(--gold); border: none; padding: 10px; border-radius: 50%; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
         }
         @media (min-width: 769px) { .btn-toggle-list { display: none; } }
 
+        /* Marker Styles */
         .price-pin { display: flex; flex-direction: column; align-items: center; }
-        .pin-label { background: var(--navy); color: var(--gold); padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px; border: 1px solid var(--gold); }
-        .pin-drop { width: 22px; height: 22px; background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center; background-size: contain; filter: hue-rotate(140deg); }
-        
-        #side-panel { position: fixed; top: 0; right: -100%; width: 100%; max-width: 380px; height: 100%; background: white; z-index: 2000; transition: 0.4s ease; box-shadow: -5px 0 15px rgba(0,0,0,0.2); }
+        .pin-label { background: var(--navy); color: var(--gold); padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; border: 1px solid var(--gold); }
+        .pin-drop { width: 20px; height: 20px; background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center; background-size: contain; filter: hue-rotate(140deg); }
+        #side-panel { position: fixed; top: 0; right: -100%; width: 100%; max-width: 350px; height: 100%; background: white; z-index: 2000; transition: 0.4s ease; box-shadow: -5px 0 15px rgba(0,0,0,0.2); }
         #side-panel.active { right: 0; }
     </style>
 </head>
 <body>
 
 <div class="main-container">
-    <!-- CỘT SẢN PHẨM MỚI ĐĂNG -->
+    <!-- CỘT SẢN PHẨM MỚI ĐĂNG (1/5) -->
     <div class="side-listing" id="sideListing">
         <div class="listing-header">
-            <span>Sản phẩm mới đăng</span>
-            <button class="btn-close-list" onclick="toggleSidebar()"><i class="fa fa-times"></i></button>
+            Sản phẩm mới đăng
+            <button class="btn-close-list" onclick="document.getElementById('sideListing').classList.remove('mobile-active')">✕</button>
         </div>
-        <div class="listing-content" id="listingItems"></div>
+        <div class="listing-content" id="listingItems">
+            <!-- Items sẽ được chèn bằng JS -->
+        </div>
     </div>
 
+    <!-- VÙNG BẢN ĐỒ -->
     <div id="map-wrapper">
         <div class="brand-header"><span>NVALAND</span></div>
         
-        <!-- Nút mở danh sách trên Mobile -->
-        <button class="btn-toggle-list" id="btnToggle" onclick="toggleSidebar()">
+        <button class="btn-toggle-list" onclick="document.getElementById('sideListing').classList.toggle('mobile-active')">
             <i class="fa fa-list"></i>
         </button>
 
@@ -109,7 +115,7 @@
                 <div class="input-wrapper">
                     <input type="text" id="inputSearch" placeholder="Tìm mã hoặc địa chỉ...">
                 </div>
-                <button style="background:var(--gold); border:none; padding:8px 15px; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="executeSearch()">Tìm</button>
+                <button style="background:var(--gold); border:none; padding:8px 15px; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="executeSearch()">Lọc</button>
             </div>
         </div>
 
@@ -122,6 +128,7 @@
     </div>
 </div>
 
+<!-- PANEL CHI TIẾT -->
 <div id="side-panel">
     <div style="padding:20px;">
         <span onclick="closePanel()" style="float:right; font-size:25px; cursor:pointer;">✕</span>
@@ -149,12 +156,6 @@
         }
     }
 
-    // Logic Đóng/Mở Sidebar
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sideListing');
-        sidebar.classList.toggle('mobile-active');
-    }
-
     const bdsData = [];
     const types = ["Nhà riêng", "Đất nền", "Chung cư", "Kho xưởng"];
     for (let i = 1; i <= 30; i++) {
@@ -163,7 +164,7 @@
             ten: types[i % 4] + " đường số " + i,
             gia: (Math.random() * 5 + 1).toFixed(1) + " tỷ",
             toaDo: [10.005 + (Math.random() * 0.03), 105.080 + (Math.random() * 0.04)],
-            mota: "Thông tin chi tiết bất động sản tại Kiên Giang..."
+            mota: "Diện tích 100m2, hướng Đông Nam..."
         });
     }
 
@@ -173,6 +174,7 @@
     function initData() {
         clusters.clearLayers();
         listContainer.innerHTML = '';
+
         bdsData.forEach(item => {
             const icon = L.divIcon({
                 className: 'custom-pin',
@@ -184,29 +186,48 @@
 
             const card = document.createElement('div');
             card.className = 'product-card';
-            card.innerHTML = `<h4>${item.ten}</h4><div class="price-tag">${item.gia}</div><p style="font-size:11px; color:gray; margin-top:5px;">Mã: ${item.id}</p>`;
+            card.innerHTML = `
+                <h4>${item.ten}</h4>
+                <p>Mã: ${item.id}</p>
+                <div class="price-tag">${item.gia}</div>
+            `;
             card.onclick = () => {
                 map.setView(item.toaDo, 17);
                 openDetail(item);
-                if(window.innerWidth <= 768) toggleSidebar(); // Tự động đóng khi chọn sản phẩm
+                if(window.innerWidth <= 768) document.getElementById('sideListing').classList.remove('mobile-active');
             };
             listContainer.appendChild(card);
         });
         map.addLayer(clusters);
     }
+
     initData();
 
     function openDetail(item) {
-        document.getElementById('panelBody').innerHTML = `<h3>${item.ten}</h3><p>Mã: ${item.id}</p><p>Giá: <b style="color:red">${item.gia}</b></p><p>${item.mota}</p><br><a href="tel:0354244883" style="display:block; text-align:center; background:var(--navy); color:var(--gold); padding:12px; border-radius:5px; text-decoration:none; font-weight:bold; border:1px solid var(--gold);">GỌI LIÊN HỆ</a>`;
+        // Link Google Maps dựa trên tọa độ
+        const mapsLink = `https://www.google.com/maps/dir/?api=1&destination=${item.toaDo[0]},${item.toaDo[1]}`;
+        
+        document.getElementById('panelBody').innerHTML = `
+            <h3 style="color:var(--navy)">${item.ten}</h3>
+            <p><b>Mã số:</b> ${item.id}</p>
+            <p><b>Giá:</b> <span style="color:red; font-weight:bold">${item.gia}</span></p>
+            <p>${item.mota}</p>
+            <br>
+            <a href="${mapsLink}" target="_blank" style="display:block; text-align:center; background:var(--gold); color:var(--navy); padding:12px; border-radius:5px; text-decoration:none; font-weight:bold; margin-bottom:10px; border:1px solid var(--navy);">CHỈ ĐƯỜNG ĐẾN BĐS</a>
+            <a href="tel:0354244883" style="display:block; text-align:center; background:var(--navy); color:var(--gold); padding:12px; border-radius:5px; text-decoration:none; font-weight:bold; border:1px solid var(--gold);">GỌI LIÊN HỆ</a>
+        `;
         document.getElementById('side-panel').classList.add('active');
     }
+
     function closePanel() { document.getElementById('side-panel').classList.remove('active'); }
+
     function executeSearch() {
         const query = document.getElementById('inputSearch').value.toUpperCase();
         const res = bdsData.find(i => i.id.includes(query));
-        if(res) { map.setView(res.toaDo, 17); openDetail(res); } else { alert("Không tìm thấy!"); }
+        if(res) { map.setView(res.toaDo, 17); openDetail(res); } else { alert("Không tìm thấy mã này!"); }
     }
 </script>
+
 </body>
 </html>
 
