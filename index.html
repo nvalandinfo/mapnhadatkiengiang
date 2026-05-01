@@ -37,12 +37,17 @@
 
         .listing-content { flex: 1; overflow-y: auto; background: var(--gray); padding: 10px; }
         
-        /* Card sản phẩm trong danh sách */
+        /* Card sản phẩm có ẢNH ĐẠI DIỆN kế bên tin (Yêu cầu 4) */
         .product-card { 
             background: white; border-radius: 6px; padding: 10px; margin-bottom: 10px;
             border-left: 4px solid var(--gold); cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             transition: 0.2s;
+            display: flex; gap: 10px; align-items: center; /* Layout ngang cho ảnh và text */
         }
+        .product-card img {
+            width: 60px; height: 60px; border-radius: 4px; object-fit: cover; background: #ddd;
+        }
+        .product-info { flex: 1; } /* Chứa text để không bị đè ảnh */
         .product-card:hover { background: #fff9e6; transform: translateX(5px); }
         .product-card h4 { margin: 0 0 5px 0; font-size: 13px; color: var(--navy); }
         .product-card p { margin: 2px 0; font-size: 11px; color: #555; }
@@ -52,17 +57,22 @@
         #map-wrapper { flex: 1; position: relative; height: 100%; }
         #map { width: 100%; height: 100%; z-index: 1; }
 
+        /* Nâng nút Zoom cao lên trong Mobile (Yêu cầu 2) */
+        .leaflet-bottom.leaflet-right { bottom: 20px !important; }
+
         /* Các UI nổi trên bản đồ */
         .brand-header { position: absolute; top: 10px; left: 10px; z-index: 1002; background: var(--navy); padding: 8px 12px; border-radius: 6px; border: 1.5px solid var(--gold); }
         .brand-header span { color: var(--gold); font-size: 14px; font-weight: 800; text-transform: uppercase; }
-        .btn-ui-float { position: absolute; top: 10px; right: 10px; z-index: 1002; }
-        .btn-post { background: #28a745; color: white; border: 1.5px solid white; width: 38px; height: 38px; border-radius: 50%; font-weight: bold; font-size: 20px; cursor: pointer; }
-
-        .main-controls { position: absolute; top: 60px; left: 10px; right: 10px; z-index: 1001; max-width: 450px; }
-        .single-search-bar { background: var(--navy); padding: 6px; border-radius: 8px; border: 1px solid var(--gold); display: flex; gap: 5px; align-items: center; }
-        .input-wrapper { flex: 1; background: white; border-radius: 4px; display: flex; padding: 0 8px; border: 1px solid var(--gold); }
-        .input-wrapper input { border: none; flex: 1; outline: none; padding: 8px; font-size: 13px; width: 100%; }
         
+        /* Chỉnh thanh tìm kiếm có icon và nút đăng tin kế bên (Yêu cầu 1 & 3) */
+        .main-controls { position: absolute; top: 60px; left: 10px; right: 10px; z-index: 1001; max-width: 480px; display: flex; gap: 5px; align-items: center; }
+        .single-search-bar { background: var(--navy); padding: 6px; border-radius: 8px; border: 1px solid var(--gold); display: flex; gap: 5px; align-items: center; flex: 1; }
+        .input-wrapper { flex: 1; background: white; border-radius: 4px; display: flex; padding: 0 8px; border: 1px solid var(--gold); align-items: center; }
+        .input-wrapper i { color: #888; font-size: 14px; margin-right: 5px; } /* Icon tìm kiếm (Yêu cầu 1) */
+        .input-wrapper input { border: none; flex: 1; outline: none; padding: 8px 0; font-size: 13px; width: 100%; }
+        
+        .btn-post-inline { background: #28a745; color: white; border: 1.5px solid white; width: 38px; height: 38px; border-radius: 8px; font-weight: bold; font-size: 20px; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+
         .map-layer-control { position: absolute; bottom: 80px; left: 10px; z-index: 1002; display: flex; flex-direction: column; gap: 5px; }
         .btn-layer { background: white; border: 2px solid var(--navy); color: var(--navy); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; }
         .btn-layer.active { background: var(--navy); color: var(--gold); border-color: var(--gold); }
@@ -71,8 +81,10 @@
         @media (max-width: 768px) {
             .side-listing { position: fixed; left: -100%; width: 80%; height: 100%; }
             .side-listing.mobile-active { left: 0; }
-            .btn-close-list { display: block; } /* Hiện nút X trên mobile */
+            .btn-close-list { display: block; } 
             .btn-toggle-list { position: absolute; bottom: 140px; left: 10px; z-index: 1003; background: var(--gold); border: none; padding: 10px; border-radius: 50%; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+            /* Dời nút zoom cao lên nữa trên mobile nếu cần */
+            .leaflet-control-zoom { margin-bottom: 60px !important; }
         }
         @media (min-width: 769px) { .btn-toggle-list { display: none; } }
 
@@ -87,18 +99,14 @@
 <body>
 
 <div class="main-container">
-    <!-- CỘT SẢN PHẨM MỚI ĐĂNG (1/5) -->
     <div class="side-listing" id="sideListing">
         <div class="listing-header">
             Sản phẩm mới đăng
             <button class="btn-close-list" onclick="document.getElementById('sideListing').classList.remove('mobile-active')">✕</button>
         </div>
-        <div class="listing-content" id="listingItems">
-            <!-- Items sẽ được chèn bằng JS -->
-        </div>
+        <div class="listing-content" id="listingItems"></div>
     </div>
 
-    <!-- VÙNG BẢN ĐỒ -->
     <div id="map-wrapper">
         <div class="brand-header"><span>NVALAND</span></div>
         
@@ -106,17 +114,16 @@
             <i class="fa fa-list"></i>
         </button>
 
-        <div class="btn-ui-float">
-            <button class="btn-post" onclick="alert('Chức năng đang phát triển')">+</button>
-        </div>
-
         <div class="main-controls">
             <div class="single-search-bar">
                 <div class="input-wrapper">
+                    <i class="fa fa-search"></i> <!-- Yêu cầu 1 -->
                     <input type="text" id="inputSearch" placeholder="Tìm mã hoặc địa chỉ...">
                 </div>
                 <button style="background:var(--gold); border:none; padding:8px 15px; border-radius:4px; font-weight:bold; cursor:pointer;" onclick="executeSearch()">Lọc</button>
             </div>
+            <!-- Yêu cầu 3: Dời nút + đăng tin vào đây -->
+            <button class="btn-post-inline" onclick="alert('Chức năng đang phát triển')">+</button>
         </div>
 
         <div class="map-layer-control">
@@ -128,7 +135,6 @@
     </div>
 </div>
 
-<!-- PANEL CHI TIẾT -->
 <div id="side-panel">
     <div style="padding:20px;">
         <span onclick="closePanel()" style="float:right; font-size:25px; cursor:pointer;">✕</span>
@@ -144,6 +150,8 @@
     const streetLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] });
 
     var map = L.map('map', { zoomControl: false, layers: [satLayer] }).setView([10.012, 105.090], 14);
+    
+    // Yêu cầu 2: Vị trí zoom mặc định bottomright nhưng CSS đã đẩy cao lên
     L.control.zoom({ position: 'bottomright' }).addTo(map);
 
     function setLayer(type) {
@@ -164,7 +172,8 @@
             ten: types[i % 4] + " đường số " + i,
             gia: (Math.random() * 5 + 1).toFixed(1) + " tỷ",
             toaDo: [10.005 + (Math.random() * 0.03), 105.080 + (Math.random() * 0.04)],
-            mota: "Diện tích 100m2, hướng Đông Nam..."
+            mota: "Diện tích 100m2, hướng Đông Nam...",
+            anh: "https://picsum.photos/id/" + (i+10) + "/200/200" // Ảnh mẫu
         });
     }
 
@@ -186,10 +195,14 @@
 
             const card = document.createElement('div');
             card.className = 'product-card';
+            // Yêu cầu 4: Thêm ảnh vào card
             card.innerHTML = `
-                <h4>${item.ten}</h4>
-                <p>Mã: ${item.id}</p>
-                <div class="price-tag">${item.gia}</div>
+                <img src="${item.anh}" alt="thumb">
+                <div class="product-info">
+                    <h4>${item.ten}</h4>
+                    <p>Mã: ${item.id}</p>
+                    <div class="price-tag">${item.gia}</div>
+                </div>
             `;
             card.onclick = () => {
                 map.setView(item.toaDo, 17);
@@ -204,10 +217,9 @@
     initData();
 
     function openDetail(item) {
-        // Link Google Maps dựa trên tọa độ
         const mapsLink = `https://www.google.com/maps/dir/?api=1&destination=${item.toaDo[0]},${item.toaDo[1]}`;
-        
         document.getElementById('panelBody').innerHTML = `
+            <img src="${item.anh}" style="width:100%; border-radius:8px; margin-bottom:15px;">
             <h3 style="color:var(--navy)">${item.ten}</h3>
             <p><b>Mã số:</b> ${item.id}</p>
             <p><b>Giá:</b> <span style="color:red; font-weight:bold">${item.gia}</span></p>
