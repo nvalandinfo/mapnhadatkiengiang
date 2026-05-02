@@ -96,7 +96,7 @@
             max-height: 0; overflow: hidden; transition: all 0.3s ease-in-out;
             border: 0 solid var(--gold);
         }
-        .filter-expandable.active { padding: 12px; max-height: 400px; border: 1.5px solid var(--gold); }
+        .filter-expandable.active { padding: 12px; max-height: 500px; border: 1.5px solid var(--gold); }
         .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
         .filter-grid select { 
             width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--gold); 
@@ -194,15 +194,37 @@
                 <div class="filter-grid">
                     <select id="fType">
                         <option value="">-- Loại nhà đất --</option>
-                        <option value="Nhà riêng">Nhà riêng</option>
-                        <option value="Chung cư">Nhà chung cư</option>
-                        <option value="Khách sạn">Khách sạn/Nhà nghỉ/Nhà trọ</option>
-                        <option value="Đất nền">Đất nền riêng</option>
+                        <option>Nhà riêng</option>
+                        <option>Nhà chung cư</option>
+                        <option>Khách sạn/Nhà nghỉ/Nhà trọ</option>
+                        <option>Đất nền riêng</option>
+                        <option>Đất dự án/Đất khu dân cư</option>
+                        <option>Đất nông nghiệp/Trang trại</option>
+                        <option>Kho bãi/Nhà xưởng</option>
                     </select>
                     <select id="fPrice">
                         <option value="">-- Mức giá --</option>
-                        <option value="0-5">Dưới 5 tỷ</option>
-                        <option value="5-10">Trên 5 tỷ</option>
+                        <option>Dưới 500 triệu</option>
+                        <option>Từ 500tr - 1 tỷ</option>
+                        <option>1 tỷ - 2 tỷ</option>
+                        <option>2 tỷ - 3 tỷ</option>
+                        <option>3 tỷ - 5 tỷ</option>
+                        <option>5 tỷ - 10 tỷ</option>
+                        <option>10 tỷ - 15 tỷ</option>
+                        <option>15 tỷ - 20 tỷ</option>
+                        <option>Trên 20 tỷ</option>
+                    </select>
+                    <select id="fArea">
+                        <option value="">-- Diện tích --</option>
+                        <option>Dưới 50m²</option>
+                        <option>50-100m²</option>
+                        <option>100 - 200m²</option>
+                        <option>Trên 200m²</option>
+                    </select>
+                    <select id="fDirection">
+                        <option value="">-- Hướng --</option>
+                        <option>Đông</option><option>Tây</option><option>Nam</option><option>Bắc</option>
+                        <option>Đông Nam</option><option>Tây Nam</option><option>Đông Bắc</option><option>Tây Bắc</option>
                     </select>
                 </div>
                 <button class="btn-apply-filter" onclick="executeFilter()">ÁP DỤNG</button>
@@ -256,17 +278,16 @@
     const types = ["Nhà riêng", "Đất nền", "Chung cư", "Kho xưởng"];
     const locations = ["Rạch Sỏi", "Vĩnh Thông", "Vĩnh Lạc", "Vĩnh Quang", "Vĩnh Thanh", "An Hòa"];
     
-    // Tạo dữ liệu mẫu
     for (let i=1; i<=30; i++) {
-        const randomViews = Math.floor(Math.random() * (500 - 50 + 1)) + 50; // Lượt xem ngẫu nhiên 50-500
+        const randomViews = Math.floor(Math.random() * (500 - 50 + 1)) + 50; 
         const d = new Date();
-        d.setDate(d.getDate() - Math.floor(Math.random() * 30)); // Ngày ngẫu nhiên trong 30 ngày qua
+        d.setDate(d.getDate() - Math.floor(Math.random() * 30)); 
         
         bdsData.push({
             id: "KG" + (i<10?"0"+i:i),
             ten: types[i % 4] + " đường số " + i,
             loai: types[i % 4],
-            giaSo: Math.random()*10, // Dùng để lọc
+            giaSo: Math.random()*10, 
             gia: (Math.random()*9+1).toFixed(1) + " tỷ",
             toaDo: [10.005 + (Math.random() * 0.03), 105.080 + (Math.random() * 0.04)],
             mota: "Diện tích 100m2, pháp lý rõ ràng...",
@@ -284,12 +305,9 @@
     function renderData(dataList) {
         clusters.clearLayers();
         listContainer.innerHTML = '';
-
-        // 1. Sắp xếp theo ngày đăng gần nhất (giảm dần)
         const sortedData = [...dataList].sort((a, b) => b.ngayDangRaw - a.ngayDangRaw);
 
         sortedData.forEach(item => {
-            // Hiển thị marker trên bản đồ
             const icon = L.divIcon({
                 className: 'custom-pin',
                 html: `<div class="price-pin"><div class="pin-label">${item.gia}</div><div class="pin-drop"></div></div>`,
@@ -298,7 +316,6 @@
             const marker = L.marker(item.toaDo, { icon: icon }).on('click', () => openDetail(item));
             clusters.addLayer(marker);
 
-            // Hiển thị thẻ tin đăng
             const card = document.createElement('div');
             card.className = 'product-card';
             card.innerHTML = `
@@ -325,21 +342,15 @@
     }
 
     function initData() { renderData(bdsData); }
-
     function toggleFilterPanel() { document.getElementById('filterPanel').classList.toggle('active'); }
 
     function executeFilter() {
         const typeVal = document.getElementById('fType').value;
-        
-        // Logic lọc cơ bản
         const filtered = bdsData.filter(item => {
             return typeVal === "" || item.loai === typeVal;
         });
-
-        renderData(filtered); // Cập nhật lại danh sách và bản đồ
-        toggleFilterPanel(); // Đóng panel
-        
-        // 2. Tự động mở danh sách tin đăng để khách xem kết quả
+        renderData(filtered);
+        toggleFilterPanel();
         document.getElementById('sideListing').classList.add('mobile-active');
     }
 
