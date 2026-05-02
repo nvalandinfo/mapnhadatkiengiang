@@ -90,6 +90,7 @@
             white-space: nowrap; min-width: 34px; text-align: center;
         }
 
+        /* Phần bộ lọc OK được thay thế */
         .filter-expandable {
             position: absolute; top: 48px; left: 0; right: 0;
             background: rgba(21, 34, 56, 0.95); border-radius: 10px; padding: 0;
@@ -165,7 +166,6 @@
                         <button class="btn-navy-gold" onclick="toggleFilterPanel()"><i class="fa fa-filter"></i></button>
                     </div>
                 </div>
-                <!-- Bổ sung 3 icon chức năng theo yêu cầu -->
                 <button class="btn-navy-gold" title="Đăng tin" onclick="alert('Mở trang đăng tin')"><i class="fa fa-plus"></i></button>
                 <button class="btn-navy-gold" title="Tin của bạn" onclick="openFunction('Tin đăng của bạn')"><i class="fa-solid fa-list-check"></i></button>
                 <button class="btn-navy-gold" title="Tài khoản" onclick="openFunction('Tài khoản người dùng')"><i class="fa-solid fa-user"></i></button>
@@ -180,6 +180,7 @@
                 <div class="btn-quick" onclick="openFunction('Tính lãi suất')"><i class="fa-solid fa-percent"></i><span>Lãi suất</span></div>
             </div>
 
+            <!-- PHẦN BỘ LỌC ĐÃ ĐƯỢC THAY THẾ TỪ FILE "BỘ LỌC OK" -->
             <div class="filter-expandable" id="filterPanel">
                 <div class="filter-grid">
                     <select id="fType"><option value="">Loại nhà đất</option><option>Nhà riêng</option><option>Chung cư</option><option>Đất nền</option></select>
@@ -236,12 +237,10 @@
 
     const bdsData = [];
     const types = ["Nhà riêng", "Đất nền", "Chung cư", "Kho xưởng"];
-    // Danh sách vị trí Kiên Giang
     const locations = ["Rạch Sỏi", "Vĩnh Thông", "Vĩnh Lạc", "Vĩnh Quang", "Vĩnh Thanh", "An Hòa", "Huyện Châu Thành", "Huyện Hòn Đất"];
     
     for (let i=1; i<=30; i++) {
         const views = Math.floor(Math.random() * (1000 - 50 + 1)) + 50;
-        // Tạo ngày đăng định dạng số (dd/mm/yyyy)
         const d = new Date();
         d.setDate(d.getDate() - Math.floor(Math.random() * 10));
         const postDate = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
@@ -309,7 +308,7 @@
     initData();
 
     function toggleFilterPanel() { document.getElementById('filterPanel').classList.toggle('active'); }
-    function executeFilter() { toggleFilterPanel(); alert("Đã lọc dữ liệu!"); }
+    function executeFilter() { toggleFilterPanel(); alert("Đã áp dụng bộ lọc mới!"); }
 
     function openDetail(item) {
         document.getElementById('panelTitle').innerText = "Chi tiết bất động sản";
