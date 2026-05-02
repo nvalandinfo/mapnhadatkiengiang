@@ -126,7 +126,6 @@
 
         .price-pin { display: flex; flex-direction: column; align-items: center; }
         .pin-label { background: var(--navy); color: var(--gold); padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; border: 1px solid var(--gold); }
-        /* CẬP NHẬT MÀU GHIM SANG ĐỎ THEO YÊU CẦU */
         .pin-drop { width: 24px; height: 24px; background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center; background-size: contain; filter: hue-rotate(0deg) brightness(1) saturate(10); }
 
         .map-layer-control { 
@@ -185,8 +184,11 @@
             <div class="quick-actions-scroll">
                 <div class="btn-quick" onclick="openFunction('Tin tức')"><i class="fa-solid fa-newspaper"></i><span>Tin tức</span></div>
                 <div class="btn-quick" onclick="openFunction('Dự án')"><i class="fa-solid fa-city"></i><span>Dự án</span></div>
-                <div class="btn-quick" onclick="openFunction('Tư vấn phong thủy')"><i class="fa-solid fa-compass"></i><span>Phong thủy</span></div>
+                <!-- CẬP NHẬT GỌI TÍNH NĂNG PHONG THỦY -->
+                <div class="btn-quick" onclick="openFunction('Xem hướng nhà')"><i class="fa-solid fa-compass"></i><span>Xem hướng</span></div>
                 <div class="btn-quick" onclick="openFunction('Xem tuổi xây nhà')"><i class="fa-solid fa-calendar-check"></i><span>Xem tuổi</span></div>
+                <div class="btn-quick" onclick="openFunction('Phong thủy văn phòng')"><i class="fa-solid fa-briefcase"></i><span>Văn phòng</span></div>
+                <div class="btn-quick" onclick="openFunction('Chọn màu sơn')"><i class="fa-solid fa-palette"></i><span>Màu sơn</span></div>
                 <div class="btn-quick" onclick="openFunction('Chi phí làm nhà')"><i class="fa-solid fa-calculator"></i><span>Chi phí</span></div>
                 <div class="btn-quick" onclick="openFunction('Tính lãi suất')"><i class="fa-solid fa-percent"></i><span>Lãi suất</span></div>
             </div>
@@ -269,7 +271,6 @@
         }
     }
 
-    // --- CẬP NHẬT DỮ LIỆU MẪU ĐẦY ĐỦ THÔNG TIN LỌC ---
     const bdsData = [];
     const types = ["Nhà riêng", "Đất nền riêng", "Nhà chung cư", "Kho bãi/Nhà xưởng"];
     const locations = ["Rạch Sỏi", "Vĩnh Thông", "Vĩnh Lạc", "Vĩnh Quang", "Vĩnh Thanh", "An Hòa"];
@@ -279,8 +280,8 @@
         const randomViews = Math.floor(Math.random() * 450) + 50; 
         const d = new Date();
         d.setDate(d.getDate() - Math.floor(Math.random() * 30)); 
-        const priceNum = (Math.random() * 6); // 0 -> 6 tỷ
-        const areaNum = Math.floor(Math.random() * 250) + 30; // 30 -> 280m2
+        const priceNum = (Math.random() * 6);
+        const areaNum = Math.floor(Math.random() * 250) + 30;
 
         bdsData.push({
             id: "KG" + (i < 10 ? "0" + i : i),
@@ -345,7 +346,6 @@
     function initData() { renderData(bdsData); }
     function toggleFilterPanel() { document.getElementById('filterPanel').classList.toggle('active'); }
 
-    // --- HÀM TÌM KIẾM THEO TỪ KHÓA ---
     function executeSearch() {
         const keyword = document.getElementById('inputSearch').value.toLowerCase().trim();
         const filtered = bdsData.filter(item => 
@@ -357,7 +357,6 @@
         document.getElementById('sideListing').classList.add('mobile-active');
     }
 
-    // --- HÀM LỌC NÂNG CAO ---
     function executeFilter() {
         const typeVal = document.getElementById('fType').value;
         const priceVal = document.getElementById('fPrice').value;
@@ -366,7 +365,6 @@
 
         const filtered = bdsData.filter(item => {
             const matchType = typeVal === "" || item.loai === typeVal;
-            
             let matchPrice = true;
             if (priceVal !== "") {
                 const p = item.giaSo;
@@ -377,7 +375,6 @@
                 else if (priceVal === "3000-5000") matchPrice = p >= 3 && p <= 5;
                 else if (priceVal === "above-5000") matchPrice = p > 5;
             }
-
             let matchArea = true;
             if (areaVal !== "") {
                 const a = item.dienTich;
@@ -386,12 +383,9 @@
                 else if (areaVal === "100-200") matchArea = a >= 100 && a <= 200;
                 else if (areaVal === "above-200") matchArea = a > 200;
             }
-
             const matchDirection = directionVal === "" || item.huong === directionVal;
-
             return matchType && matchPrice && matchArea && matchDirection;
         });
-
         renderData(filtered);
         toggleFilterPanel();
         document.getElementById('sideListing').classList.add('mobile-active');
@@ -421,9 +415,91 @@
 
     function closePanel() { document.getElementById('side-panel').classList.remove('active'); }
     
+    // --- LOGIC PHONG THỦY ĐÃ BỔ SUNG ---
+    function getCungPhi(year, gender) {
+        let sum = 0;
+        String(year).split('').forEach(n => sum += parseInt(n));
+        let base = sum % 9;
+        if (base === 0) base = 9;
+        
+        const maleCung = {1: "Khảm", 2: "Ly", 3: "Cấn", 4: "Đoài", 5: "Càn", 6: "Khôn", 7: "Tốn", 8: "Chấn", 9: "Khôn"};
+        const femaleCung = {1: "Cấn", 2: "Càn", 3: "Đoài", 4: "Cấn", 5: "Ly", 6: "Khảm", 7: "Khôn", 8: "Chấn", 9: "Tốn"};
+        
+        let name = (gender == 1) ? maleCung[base] : femaleCung[base];
+        let ids = {"Khảm":1, "Chấn":3, "Tốn":4, "Ly":9, "Khôn":2, "Cấn":8, "Đoài":7, "Càn":6};
+        return { name: name, id: ids[name] };
+    }
+
+    function calcAge() {
+        const year = document.getElementById('birthYear').value;
+        if(!year) return;
+        const currentYear = new Date().getFullYear();
+        const age = currentYear - year + 1;
+        const kimLau = age % 9;
+        const hoangOc = age % 6;
+        
+        let klTxt = (kimLau==1||kimLau==3||kimLau==6||kimLau==8) ? "Phạm Kim Lâu" : "Không phạm Kim Lâu";
+        let hoTxt = (hoangOc==3||hoangOc==5||hoangOc==0) ? "Phạm Hoang Ốc" : "Không phạm Hoang Ốc";
+        
+        document.getElementById('resAge').innerHTML = `<div style="background:#f9f9f9; padding:10px; border-radius:5px; border-left:4px solid var(--gold);">
+            <b>Năm 2026:</b> ${age} tuổi (Âm lịch)<br>${klTxt}<br>${hoTxt}
+        </div>`;
+    }
+
+    function calcHuongNha() {
+        const year = document.getElementById('hướngNam').value;
+        const gender = document.getElementById('hướngGioiTinh').value;
+        if(!year) return;
+        const cung = getCungPhi(year, gender);
+        let nhom = (cung.id === 1 || cung.id === 3 || cung.id === 4 || cung.id === 9) ? "Đông Tứ Mệnh" : "Tây Tứ Mệnh";
+        let tot = (nhom === "Đông Tứ Mệnh") ? "Đông, Nam, Bắc, Đông Nam" : "Tây, Tây Bắc, Tây Nam, Đông Bắc";
+        document.getElementById('resHuongNha').innerHTML = `<div style="background:#fff9e6; padding:10px; border-radius:5px; border:1px solid #d4af37;">
+            Cung: <b>${cung.name}</b> - Nhóm: <b>${nhom}</b><br>
+            <span style="color:green">✅ Hướng tốt: ${tot}</span>
+        </div>`;
+    }
+
     function openFunction(title) {
         document.getElementById('panelTitle').innerText = title;
-        document.getElementById('panelBody').innerHTML = `<p>Giao diện ${title} đang được phát triển...</p>`;
+        let content = `<p>Giao diện ${title} đang được phát triển...</p>`;
+        
+        if (title === 'Xem tuổi xây nhà') {
+            content = `<div>
+                <label>Năm sinh (Âm lịch):</label>
+                <input type="number" id="birthYear" placeholder="Ví dụ: 1990" style="width:100%; padding:10px; margin:10px 0; border:1px solid var(--gold);">
+                <button onclick="calcAge()" class="btn-apply-filter">KIỂM TRA NGAY</button>
+                <div id="resAge" style="margin-top:15px;"></div>
+            </div>`;
+        } else if (title === 'Xem hướng nhà') {
+            content = `<div>
+                <label>Giới tính:</label>
+                <select id="hướngGioiTinh" style="width:100%; padding:10px; margin:10px 0;"><option value="1">Nam</option><option value="2">Nữ</option></select>
+                <label>Năm sinh:</label>
+                <input type="number" id="hướngNam" placeholder="1988" style="width:100%; padding:10px; margin:10px 0;">
+                <button onclick="calcHuongNha()" class="btn-apply-filter">XEM HƯỚNG TỐT</button>
+                <div id="resHuongNha" style="margin-top:15px;"></div>
+            </div>`;
+        } else if (title === 'Phong thủy văn phòng') {
+            content = `<div>
+                <p>Bố trí bàn làm việc theo cung mệnh để tăng tài lộc:</p>
+                <ul><li>Người Đông Tứ Mệnh: Ngồi nhìn về hướng Bắc, Nam, Đông.</li><li>Người Tây Tứ Mệnh: Ngồi nhìn về hướng Tây, Tây Bắc.</li></ul>
+                <p><i>Lưu ý: Không ngồi quay lưng ra cửa sổ hoặc đối diện cửa ra vào.</i></p>
+            </div>`;
+        } else if (title === 'Chọn màu sơn') {
+            content = `<div>
+                <p>Màu sắc theo bản mệnh (Ngũ hành):</p>
+                <table style="width:100%; font-size:12px; border-collapse: collapse;">
+                    <tr style="background:#eee"><th>Mệnh</th><th>Màu hợp</th></tr>
+                    <tr><td>Kim</td><td>Trắng, Vàng, Nâu</td></tr>
+                    <tr><td>Mộc</td><td>Xanh lá, Đen, Xanh biển</td></tr>
+                    <tr><td>Thủy</td><td>Đen, Xanh biển, Trắng</td></tr>
+                    <tr><td>Hỏa</td><td>Đỏ, Hồng, Tím, Xanh lá</td></tr>
+                    <tr><td>Thổ</td><td>Vàng, Nâu, Đỏ, Tím</td></tr>
+                </table>
+            </div>`;
+        }
+        
+        document.getElementById('panelBody').innerHTML = content;
         document.getElementById('side-panel').classList.add('active');
     }
 
