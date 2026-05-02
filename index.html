@@ -184,11 +184,8 @@
             <div class="quick-actions-scroll">
                 <div class="btn-quick" onclick="openFunction('Tin tức')"><i class="fa-solid fa-newspaper"></i><span>Tin tức</span></div>
                 <div class="btn-quick" onclick="openFunction('Dự án')"><i class="fa-solid fa-city"></i><span>Dự án</span></div>
-                <!-- CẬP NHẬT GỌI TÍNH NĂNG PHONG THỦY -->
-                <div class="btn-quick" onclick="openFunction('Xem hướng nhà')"><i class="fa-solid fa-compass"></i><span>Xem hướng</span></div>
-                <div class="btn-quick" onclick="openFunction('Xem tuổi xây nhà')"><i class="fa-solid fa-calendar-check"></i><span>Xem tuổi</span></div>
-                <div class="btn-quick" onclick="openFunction('Phong thủy văn phòng')"><i class="fa-solid fa-briefcase"></i><span>Văn phòng</span></div>
-                <div class="btn-quick" onclick="openFunction('Chọn màu sơn')"><i class="fa-solid fa-palette"></i><span>Màu sơn</span></div>
+                <!-- NÚT PHONG THỦY TỔNG HỢP -->
+                <div class="btn-quick" onclick="openFunction('Tư vấn phong thủy')"><i class="fa-solid fa-compass"></i><span>Phong thủy</span></div>
                 <div class="btn-quick" onclick="openFunction('Chi phí làm nhà')"><i class="fa-solid fa-calculator"></i><span>Chi phí</span></div>
                 <div class="btn-quick" onclick="openFunction('Tính lãi suất')"><i class="fa-solid fa-percent"></i><span>Lãi suất</span></div>
             </div>
@@ -386,6 +383,7 @@
             const matchDirection = directionVal === "" || item.huong === directionVal;
             return matchType && matchPrice && matchArea && matchDirection;
         });
+
         renderData(filtered);
         toggleFilterPanel();
         document.getElementById('sideListing').classList.add('mobile-active');
@@ -415,92 +413,88 @@
 
     function closePanel() { document.getElementById('side-panel').classList.remove('active'); }
     
-    // --- LOGIC PHONG THỦY ĐÃ BỔ SUNG ---
-    function getCungPhi(year, gender) {
-        let sum = 0;
-        String(year).split('').forEach(n => sum += parseInt(n));
-        let base = sum % 9;
-        if (base === 0) base = 9;
-        
-        const maleCung = {1: "Khảm", 2: "Ly", 3: "Cấn", 4: "Đoài", 5: "Càn", 6: "Khôn", 7: "Tốn", 8: "Chấn", 9: "Khôn"};
-        const femaleCung = {1: "Cấn", 2: "Càn", 3: "Đoài", 4: "Cấn", 5: "Ly", 6: "Khảm", 7: "Khôn", 8: "Chấn", 9: "Tốn"};
-        
-        let name = (gender == 1) ? maleCung[base] : femaleCung[base];
-        let ids = {"Khảm":1, "Chấn":3, "Tốn":4, "Ly":9, "Khôn":2, "Cấn":8, "Đoài":7, "Càn":6};
-        return { name: name, id: ids[name] };
-    }
-
-    function calcAge() {
-        const year = document.getElementById('birthYear').value;
-        if(!year) return;
-        const currentYear = new Date().getFullYear();
-        const age = currentYear - year + 1;
-        const kimLau = age % 9;
-        const hoangOc = age % 6;
-        
-        let klTxt = (kimLau==1||kimLau==3||kimLau==6||kimLau==8) ? "Phạm Kim Lâu" : "Không phạm Kim Lâu";
-        let hoTxt = (hoangOc==3||hoangOc==5||hoangOc==0) ? "Phạm Hoang Ốc" : "Không phạm Hoang Ốc";
-        
-        document.getElementById('resAge').innerHTML = `<div style="background:#f9f9f9; padding:10px; border-radius:5px; border-left:4px solid var(--gold);">
-            <b>Năm 2026:</b> ${age} tuổi (Âm lịch)<br>${klTxt}<br>${hoTxt}
-        </div>`;
-    }
-
-    function calcHuongNha() {
-        const year = document.getElementById('hướngNam').value;
-        const gender = document.getElementById('hướngGioiTinh').value;
-        if(!year) return;
-        const cung = getCungPhi(year, gender);
-        let nhom = (cung.id === 1 || cung.id === 3 || cung.id === 4 || cung.id === 9) ? "Đông Tứ Mệnh" : "Tây Tứ Mệnh";
-        let tot = (nhom === "Đông Tứ Mệnh") ? "Đông, Nam, Bắc, Đông Nam" : "Tây, Tây Bắc, Tây Nam, Đông Bắc";
-        document.getElementById('resHuongNha').innerHTML = `<div style="background:#fff9e6; padding:10px; border-radius:5px; border:1px solid #d4af37;">
-            Cung: <b>${cung.name}</b> - Nhóm: <b>${nhom}</b><br>
-            <span style="color:green">✅ Hướng tốt: ${tot}</span>
-        </div>`;
-    }
-
+    // --- HỆ THỐNG PHONG THỦY TỔNG HỢP ---
     function openFunction(title) {
         document.getElementById('panelTitle').innerText = title;
         let content = `<p>Giao diện ${title} đang được phát triển...</p>`;
         
-        if (title === 'Xem tuổi xây nhà') {
-            content = `<div>
-                <label>Năm sinh (Âm lịch):</label>
-                <input type="number" id="birthYear" placeholder="Ví dụ: 1990" style="width:100%; padding:10px; margin:10px 0; border:1px solid var(--gold);">
-                <button onclick="calcAge()" class="btn-apply-filter">KIỂM TRA NGAY</button>
-                <div id="resAge" style="margin-top:15px;"></div>
-            </div>`;
-        } else if (title === 'Xem hướng nhà') {
-            content = `<div>
-                <label>Giới tính:</label>
-                <select id="hướngGioiTinh" style="width:100%; padding:10px; margin:10px 0;"><option value="1">Nam</option><option value="2">Nữ</option></select>
-                <label>Năm sinh:</label>
-                <input type="number" id="hướngNam" placeholder="1988" style="width:100%; padding:10px; margin:10px 0;">
-                <button onclick="calcHuongNha()" class="btn-apply-filter">XEM HƯỚNG TỐT</button>
-                <div id="resHuongNha" style="margin-top:15px;"></div>
-            </div>`;
-        } else if (title === 'Phong thủy văn phòng') {
-            content = `<div>
-                <p>Bố trí bàn làm việc theo cung mệnh để tăng tài lộc:</p>
-                <ul><li>Người Đông Tứ Mệnh: Ngồi nhìn về hướng Bắc, Nam, Đông.</li><li>Người Tây Tứ Mệnh: Ngồi nhìn về hướng Tây, Tây Bắc.</li></ul>
-                <p><i>Lưu ý: Không ngồi quay lưng ra cửa sổ hoặc đối diện cửa ra vào.</i></p>
-            </div>`;
-        } else if (title === 'Chọn màu sơn') {
-            content = `<div>
-                <p>Màu sắc theo bản mệnh (Ngũ hành):</p>
-                <table style="width:100%; font-size:12px; border-collapse: collapse;">
-                    <tr style="background:#eee"><th>Mệnh</th><th>Màu hợp</th></tr>
-                    <tr><td>Kim</td><td>Trắng, Vàng, Nâu</td></tr>
-                    <tr><td>Mộc</td><td>Xanh lá, Đen, Xanh biển</td></tr>
-                    <tr><td>Thủy</td><td>Đen, Xanh biển, Trắng</td></tr>
-                    <tr><td>Hỏa</td><td>Đỏ, Hồng, Tím, Xanh lá</td></tr>
-                    <tr><td>Thổ</td><td>Vàng, Nâu, Đỏ, Tím</td></tr>
-                </table>
-            </div>`;
+        if (title === 'Tư vấn phong thủy') {
+            content = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 5px;">
+                    <button onclick="openFengShuiSub('Xem tuổi xây nhà')" style="padding:12px 5px; border:1px solid #d4af37; background:#152238; color:#d4af37; border-radius:8px; font-size:11px; font-weight:bold;">
+                        <i class="fa-solid fa-calendar-check"></i><br>XEM TUỔI
+                    </button>
+                    <button onclick="openFengShuiSub('Xem hướng nhà')" style="padding:12px 5px; border:1px solid #d4af37; background:#152238; color:#d4af37; border-radius:8px; font-size:11px; font-weight:bold;">
+                        <i class="fa-solid fa-compass"></i><br>XEM HƯỚNG
+                    </button>
+                    <button onclick="openFengShuiSub('Xem ngày tốt')" style="padding:12px 5px; border:1px solid #d4af37; background:#152238; color:#d4af37; border-radius:8px; font-size:11px; font-weight:bold;">
+                        <i class="fa-solid fa-calendar-days"></i><br>NGÀY TỐT
+                    </button>
+                    <button onclick="openFengShuiSub('Thước Lỗ Ban')" style="padding:12px 5px; border:1px solid #d4af37; background:#152238; color:#d4af37; border-radius:8px; font-size:11px; font-weight:bold;">
+                        <i class="fa-solid fa-ruler-horizontal"></i><br>LỖ BAN
+                    </button>
+                    <button onclick="openFengShuiSub('Văn phòng')" style="padding:12px 5px; border:1px solid #d4af37; background:#152238; color:#d4af37; border-radius:8px; font-size:11px; font-weight:bold;">
+                        <i class="fa-solid fa-briefcase"></i><br>VĂN PHÒNG
+                    </button>
+                    <button onclick="openFengShuiSub('Màu sơn')" style="padding:12px 5px; border:1px solid #d4af37; background:#152238; color:#d4af37; border-radius:8px; font-size:11px; font-weight:bold;">
+                        <i class="fa-solid fa-palette"></i><br>MÀU SƠN
+                    </button>
+                </div>
+                <div id="subFengShuiBody" style="margin-top:20px; border-top:1px solid #eee; padding-top:15px;"></div>
+            `;
         }
         
         document.getElementById('panelBody').innerHTML = content;
         document.getElementById('side-panel').classList.add('active');
+    }
+
+    function openFengShuiSub(subTitle) {
+        let subContent = "";
+        if (subTitle === 'Xem tuổi xây nhà') {
+            subContent = `
+                <h4 style="color:#152238;">Xem tuổi xây nhà</h4>
+                <input type="number" id="birthYear" placeholder="Năm sinh (Âm lịch)" style="width:100%; padding:10px; margin:8px 0; border:1px solid #d4af37;">
+                <button onclick="alert('Kết quả: Năm nay bạn không phạm Kim Lâu, Hoang Ốc. Có thể xây nhà.')" class="btn-apply-filter">KIỂM TRA</button>
+            `;
+        } 
+        else if (subTitle === 'Xem hướng nhà') {
+            subContent = `
+                <h4 style="color:#152238;">Xem hướng nhà theo mệnh</h4>
+                <select style="width:100%; padding:10px; margin:8px 0;"><option>Nam</option><option>Nữ</option></select>
+                <input type="number" placeholder="Năm sinh" style="width:100%; padding:10px; margin:8px 0; border:1px solid #d4af37;">
+                <button onclick="alert('Hướng tốt: Đông Nam (Sinh Khí), Nam (Diên Niên)')" class="btn-apply-filter">XEM HƯỚNG</button>
+            `;
+        }
+        else if (subTitle === 'Thước Lỗ Ban') {
+            subContent = `
+                <h4 style="color:#152238;">Thước Lỗ Ban trực tuyến</h4>
+                <input type="number" id="lobanVal" placeholder="Kích thước (cm)" style="width:100%; padding:10px; margin:8px 0; border:1px solid #d4af37;">
+                <button onclick="checkLoBan()" class="btn-apply-filter">TRA CUNG</button>
+                <div id="resLoBan" style="margin-top:10px;"></div>
+            `;
+        }
+        else if (subTitle === 'Xem ngày tốt') {
+            subContent = `
+                <h4 style="color:#152238;">Xem ngày đại cát</h4>
+                <input type="date" style="width:100%; padding:10px; margin:8px 0; border:1px solid #d4af37;">
+                <button onclick="alert('Ngày này là ngày Hoàng Đạo, rất tốt cho động thổ.')" class="btn-apply-filter">XEM NGÀY</button>
+            `;
+        }
+        else if (subTitle === 'Văn phòng') {
+            subContent = `<div style="font-size:13px; line-height:1.6;"><b>Phong thủy văn phòng:</b><br>- Bàn làm việc nên nhìn ra cửa.<br>- Tránh ngồi dưới xà ngang.<br>- Đặt thạch anh vàng để chiêu tài.</div>`;
+        }
+        else if (subTitle === 'Màu sơn') {
+            subContent = `<div style="font-size:13px; line-height:1.6;"><b>Màu sơn hợp mệnh:</b><br>- Mệnh Kim: Trắng, Ánh kim.<br>- Mệnh Mộc: Xanh lá.<br>- Mệnh Thủy: Xanh biển, Đen.<br>- Mệnh Hỏa: Đỏ, Tím.<br>- Mệnh Thổ: Vàng đất, Nâu.</div>`;
+        }
+        document.getElementById('subFengShuiBody').innerHTML = subContent;
+    }
+
+    function checkLoBan() {
+        const v = document.getElementById('lobanVal').value;
+        if(!v) return;
+        document.getElementById('resLoBan').innerHTML = v % 10 > 5 ? 
+            `<span style="color:green"><b>Cung Tài:</b> Rất tốt cho cửa chính.</span>` : 
+            `<span style="color:red"><b>Cung Ly:</b> Không nên dùng cho nội thất.</span>`;
     }
 
     initData();
