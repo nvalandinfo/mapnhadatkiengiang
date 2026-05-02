@@ -59,17 +59,6 @@
         #map-wrapper { flex: 1; position: relative; height: 100%; }
         #map { width: 100%; height: 100%; z-index: 1; }
 
-        /* YÊU CẦU 3: DI CHUYỂN NÚT + - */
-        .leaflet-left .leaflet-control-zoom {
-            margin-top: 0;
-            position: fixed;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 1000;
-            border: 2px solid var(--gold) !important;
-        }
-
         .top-header-container {
             position: absolute; top: 10px; left: 10px; right: 10px; z-index: 1002;
             display: flex; flex-direction: column; gap: 8px;
@@ -140,7 +129,7 @@
         .pin-drop { width: 24px; height: 24px; background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center; background-size: contain; filter: hue-rotate(345deg) brightness(0.9) saturate(5); }
 
         .map-layer-control { 
-            position: absolute; bottom: 30px; right: 10px; z-index: 1002; 
+            position: absolute; bottom: 80px; left: 10px; z-index: 1002; 
             display: flex; flex-direction: column; gap: 8px; 
         }
         
@@ -158,11 +147,10 @@
         #side-panel.active { left: 0; }
 
         @media (max-width: 768px) {
-            .side-listing { position: fixed; left: -100%; width: 85%; }
+            .side-listing { position: fixed; left: -100%; width: 80%; }
             .side-listing.mobile-active { left: 0; }
             .btn-close-list { display: block; }
             .search-bar-container { max-width: 150px; }
-            .leaflet-left .leaflet-control-zoom { left: 5px; }
         }
     </style>
 </head>
@@ -206,33 +194,23 @@
                 <div class="filter-grid">
                     <select id="fType">
                         <option value="">-- Loại nhà đất --</option>
-                        <option>Nhà riêng</option>
-                        <option>Chung cư</option>
-                        <option>Đất nền</option>
-                        <option>Kho xưởng</option>
+                        <option value="Nhà riêng">Nhà riêng</option>
+                        <option value="Chung cư">Nhà chung cư</option>
+                        <option value="Khách sạn">Khách sạn/Nhà nghỉ/Nhà trọ</option>
+                        <option value="Đất nền">Đất nền riêng</option>
                     </select>
                     <select id="fPrice">
                         <option value="">-- Mức giá --</option>
-                        <option value="1-2">1 tỷ - 2 tỷ</option>
-                        <option value="2-3">2 tỷ - 3 tỷ</option>
-                        <option value="3-5">3 tỷ - 5 tỷ</option>
-                    </select>
-                    <select id="fArea">
-                        <option value="">-- Diện tích --</option>
-                        <option>Dưới 50m²</option>
-                        <option>50-100m²</option>
-                        <option>Trên 100m²</option>
-                    </select>
-                    <select id="fDirection">
-                        <option value="">-- Hướng --</option>
-                        <option>Đông</option><option>Tây</option><option>Nam</option><option>Bắc</option>
+                        <option value="0-5">Dưới 5 tỷ</option>
+                        <option value="5-10">Trên 5 tỷ</option>
                     </select>
                 </div>
-                <button class="btn-apply-filter" onclick="executeFilter()">ÁP DỤNG BỘ LỌC</button>
+                <button class="btn-apply-filter" onclick="executeFilter()">ÁP DỤNG</button>
             </div>
         </div>
 
         <div class="map-layer-control">
+            <div id="zoom-container"></div> 
             <button class="btn-toggle-list" onclick="document.getElementById('sideListing').classList.toggle('mobile-active')"><i class="fa fa-list"></i> Tin đăng</button>
             <button class="btn-layer active" id="btnSat" onclick="setLayer('sat')">Vệ tinh</button>
             <button class="btn-layer" id="btnStreet" onclick="setLayer('street')">Tên đường</button>
@@ -257,8 +235,11 @@
     const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri' });
     const streetLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] });
 
-    var map = L.map('map', { zoomControl: true, layers: [satLayer] }).setView([10.012, 105.090], 14);
-    
+    var map = L.map('map', { zoomControl: false, layers: [satLayer] }).setView([10.012, 105.090], 14);
+    L.control.zoom({ position: 'topleft' }).addTo(map);
+    const zoomCtrl = document.querySelector('.leaflet-control-zoom');
+    document.querySelector('.map-layer-control').prepend(zoomCtrl);
+
     function setLayer(type) {
         if(type === 'sat') {
             map.addLayer(satLayer); map.removeLayer(streetLayer);
@@ -275,44 +256,40 @@
     const types = ["Nhà riêng", "Đất nền", "Chung cư", "Kho xưởng"];
     const locations = ["Rạch Sỏi", "Vĩnh Thông", "Vĩnh Lạc", "Vĩnh Quang", "Vĩnh Thanh", "An Hòa"];
     
-    // YÊU CẦU 1: BỔ SUNG NGÀY SỐ VÀ LƯỢT XEM NGẪU NHIÊN
+    // Tạo dữ liệu mẫu
     for (let i=1; i<=30; i++) {
-        const randViews = Math.floor(Math.random() * (500 - 50 + 1)) + 50;
+        const randomViews = Math.floor(Math.random() * (500 - 50 + 1)) + 50; // Lượt xem ngẫu nhiên 50-500
         const d = new Date();
-        d.setDate(d.getDate() - Math.floor(Math.random() * 30));
+        d.setDate(d.getDate() - Math.floor(Math.random() * 30)); // Ngày ngẫu nhiên trong 30 ngày qua
         
         bdsData.push({
             id: "KG" + (i<10?"0"+i:i),
-            ten: types[i % 4] + " mặt tiền đường " + i,
+            ten: types[i % 4] + " đường số " + i,
             loai: types[i % 4],
-            giaSo: (Math.random()*4+1), 
-            gia: (Math.random()*4+1).toFixed(1) + " tỷ",
+            giaSo: Math.random()*10, // Dùng để lọc
+            gia: (Math.random()*9+1).toFixed(1) + " tỷ",
             toaDo: [10.005 + (Math.random() * 0.03), 105.080 + (Math.random() * 0.04)],
-            mota: "Diện tích 100m2, sổ hồng riêng, hỗ trợ vay ngân hàng...",
-            anh: "https://picsum.photos/id/" + (i+20) + "/200/200",
-            luotXem: randViews,
-            ngayDangRaw: d.getTime(),
+            mota: "Diện tích 100m2, pháp lý rõ ràng...",
+            anh: "https://picsum.photos/id/" + (i+10) + "/200/200",
+            luotXem: randomViews,
+            ngayDangRaw: d,
             ngayDang: `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`,
             viTri: locations[Math.floor(Math.random() * locations.length)]
         });
     }
 
-    // SẮP XẾP MỚI NHẤT LÊN ĐẦU
-    bdsData.sort((a, b) => b.ngayDangRaw - a.ngayDangRaw);
-
     var clusters = L.markerClusterGroup();
     const listContainer = document.getElementById('listingItems');
 
-    function renderList(data) {
+    function renderData(dataList) {
         clusters.clearLayers();
         listContainer.innerHTML = '';
-        
-        if(data.length === 0) {
-            listContainer.innerHTML = '<p style="text-align:center; padding:20px;">Không tìm thấy tin phù hợp.</p>';
-            return;
-        }
 
-        data.forEach(item => {
+        // 1. Sắp xếp theo ngày đăng gần nhất (giảm dần)
+        const sortedData = [...dataList].sort((a, b) => b.ngayDangRaw - a.ngayDangRaw);
+
+        sortedData.forEach(item => {
+            // Hiển thị marker trên bản đồ
             const icon = L.divIcon({
                 className: 'custom-pin',
                 html: `<div class="price-pin"><div class="pin-label">${item.gia}</div><div class="pin-drop"></div></div>`,
@@ -321,6 +298,7 @@
             const marker = L.marker(item.toaDo, { icon: icon }).on('click', () => openDetail(item));
             clusters.addLayer(marker);
 
+            // Hiển thị thẻ tin đăng
             const card = document.createElement('div');
             card.className = 'product-card';
             card.innerHTML = `
@@ -340,11 +318,43 @@
                 if(e.target.classList.contains('fav-icon')) return;
                 map.setView(item.toaDo, 17);
                 openDetail(item);
-                if(window.innerWidth <= 768) document.getElementById('sideListing').classList.remove('mobile-active');
             };
             listContainer.appendChild(card);
         });
         map.addLayer(clusters);
+    }
+
+    function initData() { renderData(bdsData); }
+
+    function toggleFilterPanel() { document.getElementById('filterPanel').classList.toggle('active'); }
+
+    function executeFilter() {
+        const typeVal = document.getElementById('fType').value;
+        
+        // Logic lọc cơ bản
+        const filtered = bdsData.filter(item => {
+            return typeVal === "" || item.loai === typeVal;
+        });
+
+        renderData(filtered); // Cập nhật lại danh sách và bản đồ
+        toggleFilterPanel(); // Đóng panel
+        
+        // 2. Tự động mở danh sách tin đăng để khách xem kết quả
+        document.getElementById('sideListing').classList.add('mobile-active');
+    }
+
+    function openDetail(item) {
+        document.getElementById('panelTitle').innerText = "Chi tiết bất động sản";
+        document.getElementById('panelBody').innerHTML = `
+            <img src="${item.anh}" style="width:100%; border-radius:8px; margin-bottom:15px;">
+            <h3 style="color:var(--navy)">${item.ten}</h3>
+            <p><b>Ngày đăng:</b> ${item.ngayDang} | <b>Lượt xem:</b> ${item.luotXem}</p>
+            <p><b>Giá:</b> <span style="color:red; font-weight:bold">${item.gia}</span></p>
+            <p>${item.mota}</p>
+            <br>
+            <a href="tel:0354244883" style="display:block; text-align:center; background:var(--navy); color:var(--gold); padding:12px; border-radius:5px; text-decoration:none; font-weight:bold; border:1px solid var(--gold);">GỌI LIÊN HỆ</a>
+        `;
+        document.getElementById('side-panel').classList.add('active');
     }
 
     function toggleFavorite(event, element) {
@@ -352,68 +362,15 @@
         element.classList.toggle('active');
     }
 
-    // KHỞI TẠO DỮ LIỆU BAN ĐẦU
-    renderList(bdsData);
-
-    function toggleFilterPanel() { document.getElementById('filterPanel').classList.toggle('active'); }
-
-    // YÊU CẦU 2: BỘ LỌC LIÊN KẾT ĐẾN TIN ĐĂNG
-    function executeFilter() {
-        const typeVal = document.getElementById('fType').value;
-        const priceVal = document.getElementById('fPrice').value;
-
-        let filtered = bdsData;
-
-        if(typeVal) filtered = filtered.filter(i => i.loai === typeVal);
-        if(priceVal) {
-            const [min, max] = priceVal.split('-').map(Number);
-            filtered = filtered.filter(i => i.giaSo >= min && i.giaSo <= max);
-        }
-
-        renderList(filtered);
-        toggleFilterPanel();
-        
-        // Mở danh sách tin đăng để khách xem kết quả (đặc biệt trên Mobile)
-        document.getElementById('sideListing').classList.add('mobile-active');
-    }
-
-    function openDetail(item) {
-        document.getElementById('panelTitle').innerText = "Chi tiết bất động sản";
-        const mapsLink = `https://www.google.com/maps/search/?api=1&query=${item.toaDo[0]},${item.toaDo[1]}`;
-        document.getElementById('panelBody').innerHTML = `
-            <img src="${item.anh}" style="width:100%; border-radius:8px; margin-bottom:15px;">
-            <h3 style="color:var(--navy)">${item.ten}</h3>
-            <p><b>Vị trí:</b> ${item.viTri}</p>
-            <p><b>Mã số:</b> ${item.id} | <b>Ngày đăng:</b> ${item.ngayDang}</p>
-            <p><b>Lượt xem:</b> ${item.luotXem} lượt</p>
-            <p><b>Giá:</b> <span style="color:red; font-weight:bold">${item.gia}</span></p>
-            <p>${item.mota}</p>
-            <br>
-            <a href="${mapsLink}" target="_blank" style="display:block; text-align:center; background:var(--gold); color:var(--navy); padding:12px; border-radius:5px; text-decoration:none; font-weight:bold; margin-bottom:10px; border:1px solid var(--navy);">CHỈ ĐƯỜNG</a>
-            <a href="tel:0354244883" style="display:block; text-align:center; background:var(--navy); color:var(--gold); padding:12px; border-radius:5px; text-decoration:none; font-weight:bold; border:1px solid var(--gold);">GỌI LIÊN HỆ</a>
-        `;
-        document.getElementById('side-panel').classList.add('active');
-    }
-
+    function closePanel() { document.getElementById('side-panel').classList.remove('active'); }
+    
     function openFunction(title) {
         document.getElementById('panelTitle').innerText = title;
         document.getElementById('panelBody').innerHTML = `<p>Giao diện ${title} đang được phát triển...</p>`;
         document.getElementById('side-panel').classList.add('active');
     }
 
-    function closePanel() { document.getElementById('side-panel').classList.remove('active'); }
-
-    function executeSearch() {
-        const query = document.getElementById('inputSearch').value.toUpperCase();
-        if(query) {
-            const res = bdsData.filter(i => i.id.includes(query) || i.viTri.toUpperCase().includes(query));
-            renderList(res);
-            if(res.length > 0) {
-                 map.setView(res[0].toaDo, 15);
-                 document.getElementById('sideListing').classList.add('mobile-active');
-            } else { alert("Không tìm thấy!"); }
-        }
-    }
+    initData();
 </script>
 </body>
 </html>
