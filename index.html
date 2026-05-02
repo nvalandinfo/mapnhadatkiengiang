@@ -126,7 +126,8 @@
 
         .price-pin { display: flex; flex-direction: column; align-items: center; }
         .pin-label { background: var(--navy); color: var(--gold); padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; border: 1px solid var(--gold); }
-        .pin-drop { width: 24px; height: 24px; background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center; background-size: contain; filter: hue-rotate(345deg) brightness(0.9) saturate(5); }
+        /* CẬP NHẬT MÀU GHIM SANG ĐỎ THEO YÊU CẦU */
+        .pin-drop { width: 24px; height: 24px; background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center; background-size: contain; filter: hue-rotate(0deg) brightness(1) saturate(10); }
 
         .map-layer-control { 
             position: absolute; bottom: 80px; left: 10px; z-index: 1002; 
@@ -196,30 +197,24 @@
                         <option value="">-- Loại nhà đất --</option>
                         <option>Nhà riêng</option>
                         <option>Nhà chung cư</option>
-                        <option>Khách sạn/Nhà nghỉ/Nhà trọ</option>
-                        <option>Đất nền riêng</option>
-                        <option>Đất dự án/Đất khu dân cư</option>
-                        <option>Đất nông nghiệp/Trang trại</option>
                         <option>Kho bãi/Nhà xưởng</option>
+                        <option>Đất nền riêng</option>
                     </select>
                     <select id="fPrice">
                         <option value="">-- Mức giá --</option>
-                        <option>Dưới 500 triệu</option>
-                        <option>Từ 500tr - 1 tỷ</option>
-                        <option>1 tỷ - 2 tỷ</option>
-                        <option>2 tỷ - 3 tỷ</option>
-                        <option>3 tỷ - 5 tỷ</option>
-                        <option>5 tỷ - 10 tỷ</option>
-                        <option>10 tỷ - 15 tỷ</option>
-                        <option>15 tỷ - 20 tỷ</option>
-                        <option>Trên 20 tỷ</option>
+                        <option value="under-500">Dưới 500 triệu</option>
+                        <option value="500-1000">Từ 500tr - 1 tỷ</option>
+                        <option value="1000-2000">1 tỷ - 2 tỷ</option>
+                        <option value="2000-3000">2 tỷ - 3 tỷ</option>
+                        <option value="3000-5000">3 tỷ - 5 tỷ</option>
+                        <option value="above-5000">Trên 5 tỷ</option>
                     </select>
                     <select id="fArea">
                         <option value="">-- Diện tích --</option>
-                        <option>Dưới 50m²</option>
-                        <option>50-100m²</option>
-                        <option>100 - 200m²</option>
-                        <option>Trên 200m²</option>
+                        <option value="under-50">Dưới 50m²</option>
+                        <option value="50-100">50-100m²</option>
+                        <option value="100-200">100 - 200m²</option>
+                        <option value="above-200">Trên 200m²</option>
                     </select>
                     <select id="fDirection">
                         <option value="">-- Hướng --</option>
@@ -274,24 +269,30 @@
         }
     }
 
+    // --- CẬP NHẬT DỮ LIỆU MẪU ĐẦY ĐỦ THÔNG TIN LỌC ---
     const bdsData = [];
-    const types = ["Nhà riêng", "Đất nền", "Chung cư", "Kho xưởng"];
+    const types = ["Nhà riêng", "Đất nền riêng", "Nhà chung cư", "Kho bãi/Nhà xưởng"];
     const locations = ["Rạch Sỏi", "Vĩnh Thông", "Vĩnh Lạc", "Vĩnh Quang", "Vĩnh Thanh", "An Hòa"];
+    const directions = ["Đông", "Tây", "Nam", "Bắc", "Đông Nam", "Tây Nam", "Đông Bắc", "Tây Bắc"];
     
     for (let i=1; i<=30; i++) {
-        const randomViews = Math.floor(Math.random() * (500 - 50 + 1)) + 50; 
+        const randomViews = Math.floor(Math.random() * 450) + 50; 
         const d = new Date();
         d.setDate(d.getDate() - Math.floor(Math.random() * 30)); 
-        
+        const priceNum = (Math.random() * 6); // 0 -> 6 tỷ
+        const areaNum = Math.floor(Math.random() * 250) + 30; // 30 -> 280m2
+
         bdsData.push({
-            id: "KG" + (i<10?"0"+i:i),
+            id: "KG" + (i < 10 ? "0" + i : i),
             ten: types[i % 4] + " đường số " + i,
             loai: types[i % 4],
-            giaSo: Math.random()*10, 
-            gia: (Math.random()*9+1).toFixed(1) + " tỷ",
+            giaSo: priceNum, 
+            gia: priceNum < 1 ? (priceNum * 1000).toFixed(0) + " triệu" : priceNum.toFixed(1) + " tỷ",
+            dienTich: areaNum,
+            huong: directions[Math.floor(Math.random() * directions.length)],
             toaDo: [10.005 + (Math.random() * 0.03), 105.080 + (Math.random() * 0.04)],
-            mota: "Diện tích 100m2, pháp lý rõ ràng...",
-            anh: "https://picsum.photos/id/" + (i+10) + "/200/200",
+            mota: "Bất động sản vị trí đẹp, pháp lý hoàn chỉnh, thích hợp đầu tư hoặc ở ngay...",
+            anh: "https://picsum.photos/id/" + (i + 10) + "/200/200",
             luotXem: randomViews,
             ngayDangRaw: d,
             ngayDang: `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`,
@@ -323,7 +324,7 @@
                 <div class="product-info">
                     <h4>${item.ten}</h4>
                     <p>Mã: ${item.id} | <b>${item.viTri}</b></p>
-                    <div class="price-tag">${item.gia}</div>
+                    <div class="price-tag">${item.gia} - ${item.dienTich}m²</div>
                     <div class="product-meta">
                         <span><i class="fa fa-calendar"></i> ${item.ngayDang}</span>
                         <span><i class="fa fa-eye"></i> ${item.luotXem}</span>
@@ -344,39 +345,55 @@
     function initData() { renderData(bdsData); }
     function toggleFilterPanel() { document.getElementById('filterPanel').classList.toggle('active'); }
 
-    // --- HÀM ĐÃ ĐƯỢC CẬP NHẬT THEO YÊU CẦU ---
+    // --- HÀM TÌM KIẾM THEO TỪ KHÓA ---
+    function executeSearch() {
+        const keyword = document.getElementById('inputSearch').value.toLowerCase().trim();
+        const filtered = bdsData.filter(item => 
+            item.id.toLowerCase().includes(keyword) || 
+            item.ten.toLowerCase().includes(keyword) || 
+            item.viTri.toLowerCase().includes(keyword)
+        );
+        renderData(filtered);
+        document.getElementById('sideListing').classList.add('mobile-active');
+    }
+
+    // --- HÀM LỌC NÂNG CAO ---
     function executeFilter() {
-        // Lấy giá trị từ các bộ lọc
         const typeVal = document.getElementById('fType').value;
         const priceVal = document.getElementById('fPrice').value;
         const areaVal = document.getElementById('fArea').value;
         const directionVal = document.getElementById('fDirection').value;
 
-        // Lọc dữ liệu chính xác
         const filtered = bdsData.filter(item => {
-            // Kiểm tra Loại nhà đất
             const matchType = typeVal === "" || item.loai === typeVal;
             
-            // Kiểm tra Mức giá (Giả định logic so sánh dựa trên thuộc tính gia hoặc giaSo của dữ liệu)
-            // Lưu ý: Để lọc chính xác tuyệt đối, dữ liệu mẫu cần có các thuộc tính tương ứng
-            const matchPrice = priceVal === "" || item.gia.includes(priceVal) || (item.mucGia === priceVal);
-            
-            // Kiểm tra Diện tích
-            const matchArea = areaVal === "" || (item.dienTichPhanLoai === areaVal);
-            
-            // Kiểm tra Hướng
+            let matchPrice = true;
+            if (priceVal !== "") {
+                const p = item.giaSo;
+                if (priceVal === "under-500") matchPrice = p < 0.5;
+                else if (priceVal === "500-1000") matchPrice = p >= 0.5 && p <= 1;
+                else if (priceVal === "1000-2000") matchPrice = p >= 1 && p <= 2;
+                else if (priceVal === "2000-3000") matchPrice = p >= 2 && p <= 3;
+                else if (priceVal === "3000-5000") matchPrice = p >= 3 && p <= 5;
+                else if (priceVal === "above-5000") matchPrice = p > 5;
+            }
+
+            let matchArea = true;
+            if (areaVal !== "") {
+                const a = item.dienTich;
+                if (areaVal === "under-50") matchArea = a < 50;
+                else if (areaVal === "50-100") matchArea = a >= 50 && a <= 100;
+                else if (areaVal === "100-200") matchArea = a >= 100 && a <= 200;
+                else if (areaVal === "above-200") matchArea = a > 200;
+            }
+
             const matchDirection = directionVal === "" || item.huong === directionVal;
 
             return matchType && matchPrice && matchArea && matchDirection;
         });
 
-        // Cập nhật bản đồ và danh sách
         renderData(filtered);
-        
-        // Đóng bảng lọc
         toggleFilterPanel();
-        
-        // Tự động mở thanh danh sách để hiển thị kết quả
         document.getElementById('sideListing').classList.add('mobile-active');
     }
 
@@ -385,11 +402,14 @@
         document.getElementById('panelBody').innerHTML = `
             <img src="${item.anh}" style="width:100%; border-radius:8px; margin-bottom:15px;">
             <h3 style="color:var(--navy)">${item.ten}</h3>
-            <p><b>Ngày đăng:</b> ${item.ngayDang} | <b>Lượt xem:</b> ${item.luotXem}</p>
-            <p><b>Giá:</b> <span style="color:red; font-weight:bold">${item.gia}</span></p>
+            <p><b>Mã SP:</b> ${item.id} | <b>Hướng:</b> ${item.huong}</p>
+            <p><b>Diện tích:</b> ${item.dienTich}m² | <b>Vị trí:</b> ${item.viTri}</p>
+            <p><b>Giá niêm yết:</b> <span style="color:red; font-weight:bold">${item.gia}</span></p>
             <p>${item.mota}</p>
-            <br>
-            <a href="tel:0354244883" style="display:block; text-align:center; background:var(--navy); color:var(--gold); padding:12px; border-radius:5px; text-decoration:none; font-weight:bold; border:1px solid var(--gold);">GỌI LIÊN HỆ</a>
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <a href="tel:0354244883" style="flex:1; text-align:center; background:var(--navy); color:var(--gold); padding:12px; border-radius:5px; text-decoration:none; font-weight:bold; border:1px solid var(--gold);">GỌI ĐIỆN</a>
+                <button onclick="alert('Đã lưu tin!')" style="flex:1; background:white; color:var(--navy); border:1px solid var(--navy); border-radius:5px; font-weight:bold;">LƯU TIN</button>
+            </div>
         `;
         document.getElementById('side-panel').classList.add('active');
     }
