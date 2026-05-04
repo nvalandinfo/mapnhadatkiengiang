@@ -184,7 +184,6 @@
             <div class="quick-actions-scroll">
                 <div class="btn-quick" onclick="openFunction('Tin tức')"><i class="fa-solid fa-newspaper"></i><span>Tin tức</span></div>
                 <div class="btn-quick" onclick="openFunction('Dự án')"><i class="fa-solid fa-city"></i><span>Dự án</span></div>
-                <!-- NÚT PHONG THỦY TỔNG HỢP -->
                 <div class="btn-quick" onclick="openFunction('Tư vấn phong thủy')"><i class="fa-solid fa-compass"></i><span>Phong thủy</span></div>
                 <div class="btn-quick" onclick="openFunction('Chi phí làm nhà')"><i class="fa-solid fa-calculator"></i><span>Chi phí</span></div>
                 <div class="btn-quick" onclick="openFunction('Tính lãi suất')"><i class="fa-solid fa-percent"></i><span>Lãi suất</span></div>
@@ -413,7 +412,6 @@
 
     function closePanel() { document.getElementById('side-panel').classList.remove('active'); }
     
-    // --- HỆ THỐNG PHONG THỦY TỔNG HỢP ---
     function openFunction(title) {
         document.getElementById('panelTitle').innerText = title;
         let content = `<p>Giao diện ${title} đang được phát triển...</p>`;
