@@ -3,45 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NVALAND - MOBILE OPTIMIZED</title>
+    <title>NVALAND - SUPABASE CONNECTED</title>
+    <!-- Thư viện Leaflet & FontAwesome giữ nguyên -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    
+    <!-- NHÚNG THƯ VIỆN SUPABASE (MỚI) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
+        /* GIỮ NGUYÊN TOÀN BỘ CSS CỦA BẠN */
         :root { --navy: #152238; --gold: #d4af37; --white: #ffffff; --dark-navy: #0b1320; --gray: #f4f4f4; --red-google: #EA4335; }
         body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; background: var(--dark-navy); }
-        
         .main-container { display: flex; width: 100%; height: 100vh; }
-
-        .side-listing {
-            width: 20%; min-width: 250px; height: 100%;
-            background: var(--white); border-right: 2px solid var(--gold);
-            display: flex; flex-direction: column; z-index: 1005;
-            transition: all 0.3s ease;
-        }
-
-        .listing-header {
-            background: var(--navy); color: var(--gold); padding: 15px;
-            font-weight: bold; text-align: center; font-size: 14px;
-            text-transform: uppercase; border-bottom: 2px solid var(--gold);
-            display: flex; justify-content: center; align-items: center; position: relative;
-        }
-
-        .btn-close-list {
-            position: absolute; right: 10px; background: none; border: none;
-            color: var(--gold); font-size: 20px; cursor: pointer; display: none;
-        }
-
+        .side-listing { width: 20%; min-width: 250px; height: 100%; background: var(--white); border-right: 2px solid var(--gold); display: flex; flex-direction: column; z-index: 1005; transition: all 0.3s ease; }
+        .listing-header { background: var(--navy); color: var(--gold); padding: 15px; font-weight: bold; text-align: center; font-size: 14px; text-transform: uppercase; border-bottom: 2px solid var(--gold); display: flex; justify-content: center; align-items: center; position: relative; }
+        .btn-close-list { position: absolute; right: 10px; background: none; border: none; color: var(--gold); font-size: 20px; cursor: pointer; display: none; }
         .listing-content { flex: 1; overflow-y: auto; background: var(--gray); padding: 10px; }
-
-        .product-card {
-            background: white; border-radius: 6px; padding: 10px; margin-bottom: 10px;
-            border-left: 4px solid var(--gold); cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: 0.2s; display: flex; gap: 10px; align-items: center;
-            position: relative;
-        }
-
+        .product-card { background: white; border-radius: 6px; padding: 10px; margin-bottom: 10px; border-left: 4px solid var(--gold); cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s; display: flex; gap: 10px; align-items: center; position: relative; }
         .product-card img { width: 60px; height: 60px; border-radius: 4px; object-fit: cover; background: #ddd; }
         .product-info { flex: 1; }
         .product-card:hover { background: #fff9e6; transform: translateX(5px); }
@@ -49,112 +30,44 @@
         .product-card p { margin: 2px 0; font-size: 11px; color: #555; }
         .product-card .price-tag { color: #d32f2f; font-weight: bold; font-size: 12px; }
         .product-meta { font-size: 10px; color: #888; margin-top: 4px; display: flex; justify-content: space-between; }
-
-        .fav-icon {
-            position: absolute; top: 10px; right: 10px; color: #ccc;
-            font-size: 16px; transition: 0.3s; z-index: 10;
-        }
+        .fav-icon { position: absolute; top: 10px; right: 10px; color: #ccc; font-size: 16px; transition: 0.3s; z-index: 10; }
         .fav-icon.active { color: #e74c3c; }
-
         #map-wrapper { flex: 1; position: relative; height: 100%; }
         #map { width: 100%; height: 100%; z-index: 1; }
-
-        .top-header-container {
-            position: absolute; top: 10px; left: 10px; right: 10px; z-index: 1002;
-            display: flex; flex-direction: column; gap: 8px;
-        }
-
+        .top-header-container { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 1002; display: flex; flex-direction: column; gap: 8px; }
         .header-row-1 { display: flex; align-items: center; gap: 8px; width: 100%; }
-
-        .brand-header { 
-            background: var(--navy); padding: 8px 12px; border-radius: 6px; 
-            border: 1.5px solid var(--gold); white-space: nowrap;
-        }
+        .brand-header { background: var(--navy); padding: 8px 12px; border-radius: 6px; border: 1.5px solid var(--gold); white-space: nowrap; }
         .brand-header span { color: var(--gold); font-size: 14px; font-weight: 800; text-transform: uppercase; }
-
-        .search-bar-container {
-            background: var(--navy); padding: 4px 8px; border-radius: 8px;
-            border: 1px solid var(--gold); box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            flex: 1; max-width: 300px;
-        }
+        .search-bar-container { background: var(--navy); padding: 4px 8px; border-radius: 8px; border: 1px solid var(--gold); box-shadow: 0 4px 10px rgba(0,0,0,0.3); flex: 1; max-width: 300px; }
         .row-flex { display: flex; gap: 5px; align-items: center; }
-        .input-custom {
-            flex: 1; background: white; border-radius: 4px;
-            display: flex; align-items: center; padding: 0 8px; border: 1px solid var(--gold);
-        }
+        .input-custom { flex: 1; background: white; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; border: 1px solid var(--gold); }
         .input-custom input { border: none; outline: none; padding: 5px 4px; font-size: 12px; width: 100%; }
-        
-        .btn-navy-gold {
-            background: var(--navy); color: var(--gold); border: 1px solid var(--gold);
-            padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px;
-            white-space: nowrap; min-width: 34px; text-align: center;
-        }
-
-        .filter-expandable {
-            position: absolute; top: 48px; left: 0; right: 0;
-            background: rgba(21, 34, 56, 0.95); border-radius: 10px; padding: 0;
-            max-height: 0; overflow: hidden; transition: all 0.3s ease-in-out;
-            border: 0 solid var(--gold);
-        }
+        .btn-navy-gold { background: var(--navy); color: var(--gold); border: 1px solid var(--gold); padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 11px; white-space: nowrap; min-width: 34px; text-align: center; }
+        .filter-expandable { position: absolute; top: 48px; left: 0; right: 0; background: rgba(21, 34, 56, 0.95); border-radius: 10px; padding: 0; max-height: 0; overflow: hidden; transition: all 0.3s ease-in-out; border: 0 solid var(--gold); }
         .filter-expandable.active { padding: 12px; max-height: 500px; border: 1.5px solid var(--gold); }
         .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
-        .filter-grid select { 
-            width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--gold); 
-            font-size: 11px; color: var(--navy); background: white; 
-        }
-        .btn-apply-filter {
-            background: var(--gold); color: var(--navy); border: none;
-            padding: 10px; border-radius: 5px; font-weight: bold; margin-top: 10px; cursor: pointer; width: 100%;
-        }
-
-        .quick-actions-scroll {
-            display: flex; overflow-x: auto; gap: 6px; width: 100%;
-            scrollbar-width: none; -ms-overflow-style: none;
-        }
+        .filter-grid select { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--gold); font-size: 11px; color: var(--navy); background: white; }
+        .btn-apply-filter { background: var(--gold); color: var(--navy); border: none; padding: 10px; border-radius: 5px; font-weight: bold; margin-top: 10px; cursor: pointer; width: 100%; }
+        .quick-actions-scroll { display: flex; overflow-x: auto; gap: 6px; width: 100%; scrollbar-width: none; -ms-overflow-style: none; }
         .quick-actions-scroll::-webkit-scrollbar { display: none; }
-
-        .btn-quick {
-            flex: 0 0 auto; background: rgba(21, 34, 56, 0.85);
-            backdrop-filter: blur(5px); border: 1px solid var(--gold);
-            border-radius: 6px; color: var(--gold);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            width: 65px; height: 48px;
-            cursor: pointer; transition: 0.3s;
-        }
+        .btn-quick { flex: 0 0 auto; background: rgba(21, 34, 56, 0.85); backdrop-filter: blur(5px); border: 1px solid var(--gold); border-radius: 6px; color: var(--gold); display: flex; flex-direction: column; align-items: center; justify-content: center; width: 65px; height: 48px; cursor: pointer; transition: 0.3s; }
         .btn-quick i { font-size: 13px; margin-bottom: 2px; }
         .btn-quick span { font-size: 8px; font-weight: bold; text-align: center; white-space: nowrap; }
-
         .price-pin { display: flex; flex-direction: column; align-items: center; }
         .pin-label { background: var(--navy); color: var(--gold); padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; border: 1px solid var(--gold); }
         .pin-drop { width: 24px; height: 24px; background: url('https://cdn-icons-png.flaticon.com/512/684/684908.png') no-repeat center; background-size: contain; filter: hue-rotate(0deg) brightness(1) saturate(10); }
-
-        .map-layer-control { 
-            position: absolute; bottom: 80px; left: 10px; z-index: 1002; 
-            display: flex; flex-direction: column; gap: 8px; 
-        }
-        
+        .map-layer-control { position: absolute; bottom: 80px; left: 10px; z-index: 1002; display: flex; flex-direction: column; gap: 8px; }
         .btn-layer { background: white; border: 2px solid var(--navy); color: var(--navy); padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; }
         .btn-layer.active { background: var(--navy); color: var(--gold); border-color: var(--gold); }
-
-        .btn-toggle-list { 
-            background: var(--gold); color: var(--navy); border: 1px solid var(--navy); 
-            padding: 10px 15px; border-radius: 8px; cursor: pointer; 
-            font-size: 12px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-            display: flex; align-items: center; gap: 5px;
-        }
-
+        .btn-toggle-list { background: var(--gold); color: var(--navy); border: 1px solid var(--navy); padding: 10px 15px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 5px; }
         #side-panel { position: fixed; top: 0; left: -100%; width: 100%; max-width: 400px; height: 100%; background: white; z-index: 3000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 5px 0 15px rgba(0,0,0,0.3); }
         #side-panel.active { left: 0; }
-
-        @media (max-width: 768px) {
-            .side-listing { position: fixed; left: -100%; width: 80%; }
-            .side-listing.mobile-active { left: 0; }
-            .btn-close-list { display: block; }
-            .search-bar-container { max-width: 150px; }
-        }
+        @media (max-width: 768px) { .side-listing { position: fixed; left: -100%; width: 80%; } .side-listing.mobile-active { left: 0; } .btn-close-list { display: block; } .search-bar-container { max-width: 150px; } }
     </style>
 </head>
 <body>
+
+<!-- TOÀN BỘ CẤU TRÚC HTML GIỮ NGUYÊN -->
 <div class="main-container">
     <div class="side-listing" id="sideListing">
         <div class="listing-header">
@@ -176,7 +89,7 @@
                         <button class="btn-navy-gold" onclick="toggleFilterPanel()"><i class="fa fa-filter"></i></button>
                     </div>
                 </div>
-                <button class="btn-navy-gold" title="Đăng tin" onclick="alert('Mở trang đăng tin')"><i class="fa fa-plus"></i></button>
+                <button class="btn-navy-gold" title="Đăng tin" onclick="alert('Chức năng đang phát triển')"><i class="fa fa-plus"></i></button>
                 <button class="btn-navy-gold" title="Tin của bạn" onclick="openFunction('Tin đăng của bạn')"><i class="fa-solid fa-list-check"></i></button>
                 <button class="btn-navy-gold" title="Tài khoản" onclick="openFunction('Tài khoản người dùng')"><i class="fa-solid fa-user"></i></button>
             </div>
@@ -246,59 +159,56 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+
 <script>
+    // --- 1. CẤU HÌNH SUPABASE (THAY ĐỔI TẠI ĐÂY) ---
+    const SUPABASE_URL = 'URL_CỦA_BẠN'; // Ví dụ: https://xyz.supabase.co
+    const SUPABASE_KEY = 'KEY_CỦA_BẠN'; // Anon Key của bạn
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // --- 2. SETUP BẢN ĐỒ (GIỮ NGUYÊN) ---
     const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri' });
     const streetLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] });
-
     var map = L.map('map', { zoomControl: false, layers: [satLayer] }).setView([10.012, 105.090], 14);
     L.control.zoom({ position: 'topleft' }).addTo(map);
     const zoomCtrl = document.querySelector('.leaflet-control-zoom');
     document.querySelector('.map-layer-control').prepend(zoomCtrl);
 
     function setLayer(type) {
-        if(type === 'sat') {
-            map.addLayer(satLayer); map.removeLayer(streetLayer);
-            document.getElementById('btnSat').classList.add('active');
-            document.getElementById('btnStreet').classList.remove('active');
-        } else {
-            map.addLayer(streetLayer); map.removeLayer(satLayer);
-            document.getElementById('btnStreet').classList.add('active');
-            document.getElementById('btnSat').classList.remove('active');
-        }
+        if(type === 'sat') { map.addLayer(satLayer); map.removeLayer(streetLayer); document.getElementById('btnSat').classList.add('active'); document.getElementById('btnStreet').classList.remove('active'); }
+        else { map.addLayer(streetLayer); map.removeLayer(satLayer); document.getElementById('btnStreet').classList.add('active'); document.getElementById('btnSat').classList.remove('active'); }
     }
 
-    const bdsData = [];
-    const types = ["Nhà riêng", "Đất nền riêng", "Nhà chung cư", "Kho bãi/Nhà xưởng"];
-    const locations = ["Rạch Sỏi", "Vĩnh Thông", "Vĩnh Lạc", "Vĩnh Quang", "Vĩnh Thanh", "An Hòa"];
-    const directions = ["Đông", "Tây", "Nam", "Bắc", "Đông Nam", "Tây Nam", "Đông Bắc", "Tây Bắc"];
-    
-    for (let i=1; i<=30; i++) {
-        const randomViews = Math.floor(Math.random() * 450) + 50; 
-        const d = new Date();
-        d.setDate(d.getDate() - Math.floor(Math.random() * 30)); 
-        const priceNum = (Math.random() * 6);
-        const areaNum = Math.floor(Math.random() * 250) + 30;
-
-        bdsData.push({
-            id: "KG" + (i < 10 ? "0" + i : i),
-            ten: types[i % 4] + " đường số " + i,
-            loai: types[i % 4],
-            giaSo: priceNum, 
-            gia: priceNum < 1 ? (priceNum * 1000).toFixed(0) + " triệu" : priceNum.toFixed(1) + " tỷ",
-            dienTich: areaNum,
-            huong: directions[Math.floor(Math.random() * directions.length)],
-            toaDo: [10.005 + (Math.random() * 0.03), 105.080 + (Math.random() * 0.04)],
-            mota: "Bất động sản vị trí đẹp, pháp lý hoàn chỉnh, thích hợp đầu tư hoặc ở ngay...",
-            anh: "https://picsum.photos/id/" + (i + 10) + "/200/200",
-            luotXem: randomViews,
-            ngayDangRaw: d,
-            ngayDang: `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`,
-            viTri: locations[Math.floor(Math.random() * locations.length)]
-        });
-    }
-
+    // --- 3. QUẢN LÝ DỮ LIỆU ---
+    let bdsData = []; // Sẽ chứa dữ liệu tải từ Supabase
     var clusters = L.markerClusterGroup();
     const listContainer = document.getElementById('listingItems');
+
+    async function loadDataFromSupabase() {
+        listContainer.innerHTML = '<p style="text-align:center; padding:20px;">Đang tải dữ liệu...</p>';
+        
+        const { data, error } = await supabaseClient
+            .from('products')
+            .select('*');
+
+        if (error) {
+            console.error('Lỗi Supabase:', error);
+            listContainer.innerHTML = '<p style="color:red; text-align:center;">Lỗi kết nối dữ liệu!</p>';
+            return;
+        }
+
+        // Chuẩn hóa dữ liệu về định dạng code đang dùng
+        bdsData = data.map(item => ({
+            ...item,
+            toaDo: typeof item.toa_do === 'string' ? item.toa_do.split(',').map(Number) : item.toa_do,
+            giaSo: parseFloat(item.gia_so),
+            dienTich: parseInt(item.dien_tich),
+            ngayDangRaw: new Date(item.created_at || Date.now()),
+            ngayDang: item.ngay_dang || new Date().toLocaleDateString('vi-VN')
+        }));
+
+        renderData(bdsData);
+    }
 
     function renderData(dataList) {
         clusters.clearLayers();
@@ -320,11 +230,11 @@
                 <img src="${item.anh}" alt="thumb">
                 <div class="product-info">
                     <h4>${item.ten}</h4>
-                    <p>Mã: ${item.id} | <b>${item.viTri}</b></p>
+                    <p>Mã: ${item.id} | <b>${item.vi_tri || item.viTri}</b></p>
                     <div class="price-tag">${item.gia} - ${item.dienTich}m²</div>
                     <div class="product-meta">
                         <span><i class="fa fa-calendar"></i> ${item.ngayDang}</span>
-                        <span><i class="fa fa-eye"></i> ${item.luotXem}</span>
+                        <span><i class="fa fa-eye"></i> ${item.luotXem || 0}</span>
                     </div>
                 </div>
                 <i class="fa fa-heart fav-icon" onclick="toggleFavorite(event, this)"></i>
@@ -339,7 +249,7 @@
         map.addLayer(clusters);
     }
 
-    function initData() { renderData(bdsData); }
+    // --- 4. CÁC LOGIC TÌM KIẾM/FILTER (GIỮ NGUYÊN) ---
     function toggleFilterPanel() { document.getElementById('filterPanel').classList.toggle('active'); }
 
     function executeSearch() {
@@ -347,7 +257,7 @@
         const filtered = bdsData.filter(item => 
             item.id.toLowerCase().includes(keyword) || 
             item.ten.toLowerCase().includes(keyword) || 
-            item.viTri.toLowerCase().includes(keyword)
+            (item.vi_tri || "").toLowerCase().includes(keyword)
         );
         renderData(filtered);
         document.getElementById('sideListing').classList.add('mobile-active');
@@ -382,7 +292,6 @@
             const matchDirection = directionVal === "" || item.huong === directionVal;
             return matchType && matchPrice && matchArea && matchDirection;
         });
-
         renderData(filtered);
         toggleFilterPanel();
         document.getElementById('sideListing').classList.add('mobile-active');
@@ -394,9 +303,9 @@
             <img src="${item.anh}" style="width:100%; border-radius:8px; margin-bottom:15px;">
             <h3 style="color:var(--navy)">${item.ten}</h3>
             <p><b>Mã SP:</b> ${item.id} | <b>Hướng:</b> ${item.huong}</p>
-            <p><b>Diện tích:</b> ${item.dienTich}m² | <b>Vị trí:</b> ${item.viTri}</p>
+            <p><b>Diện tích:</b> ${item.dienTich}m² | <b>Vị trí:</b> ${item.vi_tri || item.viTri}</p>
             <p><b>Giá niêm yết:</b> <span style="color:red; font-weight:bold">${item.gia}</span></p>
-            <p>${item.mota}</p>
+            <p>${item.mota || 'Chưa có mô tả chi tiết.'}</p>
             <div style="display:flex; gap:10px; margin-top:15px;">
                 <a href="tel:0354244883" style="flex:1; text-align:center; background:var(--navy); color:var(--gold); padding:12px; border-radius:5px; text-decoration:none; font-weight:bold; border:1px solid var(--gold);">GỌI ĐIỆN</a>
                 <button onclick="alert('Đã lưu tin!')" style="flex:1; background:white; color:var(--navy); border:1px solid var(--navy); border-radius:5px; font-weight:bold;">LƯU TIN</button>
@@ -405,97 +314,49 @@
         document.getElementById('side-panel').classList.add('active');
     }
 
-    function toggleFavorite(event, element) {
-        event.stopPropagation();
-        element.classList.toggle('active');
-    }
-
+    function toggleFavorite(event, element) { event.stopPropagation(); element.classList.toggle('active'); }
     function closePanel() { document.getElementById('side-panel').classList.remove('active'); }
-    
+
+    // --- 5. TÍNH NĂNG PHONG THỦY (GIỮ NGUYÊN 100%) ---
     function openFunction(title) {
         document.getElementById('panelTitle').innerText = title;
         let content = `<p>Giao diện ${title} đang được phát triển...</p>`;
-        
         if (title === 'Tư vấn phong thủy') {
             content = `
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 5px;">
-                    <button onclick="openFengShuiSub('Xem tuổi xây nhà')" style="padding:12px 5px; border:1px solid #d4af37; background:#152238; color:#d4af37; border-radius:8px; font-size:11px; font-weight:bold;">
-                        <i class="fa-solid fa-calendar-check"></i><br>XEM TUỔI
-                    </button>
-                    <button onclick="openFengShuiSub('Xem hướng nhà')" style="padding:12px 5px; border:1px solid #d4af37; background:#152238; color:#d4af37; border-radius:8px; font-size:11px; font-weight:bold;">
-                        <i class="fa-solid fa-compass"></i><br>XEM HƯỚNG
-                    </button>
-                    <button onclick="openFengShuiSub('Xem ngày tốt')" style="padding:12px 5px; border:1px solid #d4af37; background:#152238; color:#d4af37; border-radius:8px; font-size:11px; font-weight:bold;">
-                        <i class="fa-solid fa-calendar-days"></i><br>NGÀY TỐT
-                    </button>
-                    <button onclick="openFengShuiSub('Thước Lỗ Ban')" style="padding:12px 5px; border:1px solid #d4af37; background:#152238; color:#d4af37; border-radius:8px; font-size:11px; font-weight:bold;">
-                        <i class="fa-solid fa-ruler-horizontal"></i><br>LỖ BAN
-                    </button>
-                    <button onclick="openFengShuiSub('Văn phòng')" style="padding:12px 5px; border:1px solid #d4af37; background:#152238; color:#d4af37; border-radius:8px; font-size:11px; font-weight:bold;">
-                        <i class="fa-solid fa-briefcase"></i><br>VĂN PHÒNG
-                    </button>
-                    <button onclick="openFengShuiSub('Màu sơn')" style="padding:12px 5px; border:1px solid #d4af37; background:#152238; color:#d4af37; border-radius:8px; font-size:11px; font-weight:bold;">
-                        <i class="fa-solid fa-palette"></i><br>MÀU SƠN
-                    </button>
+                    <button onclick="openFengShuiSub('Xem tuổi xây nhà')" style="padding:12px 5px; border:1px solid #d4af37; background:#152238; color:#d4af37; border-radius:8px; font-size:11px; font-weight:bold;"><i class="fa-solid fa-calendar-check"></i><br>XEM TUỔI</button>
+                    <button onclick="openFengShuiSub('Xem hướng nhà')" style="padding:12px 5px; border:1px solid #d4af37; background:#152238; color:#d4af37; border-radius:8px; font-size:11px; font-weight:bold;"><i class="fa-solid fa-compass"></i><br>XEM HƯỚNG</button>
+                    <button onclick="openFengShuiSub('Xem ngày tốt')" style="padding:12px 5px; border:1px solid #d4af37; background:#152238; color:#d4af37; border-radius:8px; font-size:11px; font-weight:bold;"><i class="fa-solid fa-calendar-days"></i><br>NGÀY TỐT</button>
+                    <button onclick="openFengShuiSub('Thước Lỗ Ban')" style="padding:12px 5px; border:1px solid #d4af37; background:#152238; color:#d4af37; border-radius:8px; font-size:11px; font-weight:bold;"><i class="fa-solid fa-ruler-horizontal"></i><br>LỖ BAN</button>
+                    <button onclick="openFengShuiSub('Văn phòng')" style="padding:12px 5px; border:1px solid #d4af37; background:#152238; color:#d4af37; border-radius:8px; font-size:11px; font-weight:bold;"><i class="fa-solid fa-briefcase"></i><br>VĂN PHÒNG</button>
+                    <button onclick="openFengShuiSub('Màu sơn')" style="padding:12px 5px; border:1px solid #d4af37; background:#152238; color:#d4af37; border-radius:8px; font-size:11px; font-weight:bold;"><i class="fa-solid fa-palette"></i><br>MÀU SƠN</button>
                 </div>
                 <div id="subFengShuiBody" style="margin-top:20px; border-top:1px solid #eee; padding-top:15px;"></div>
             `;
         }
-        
         document.getElementById('panelBody').innerHTML = content;
         document.getElementById('side-panel').classList.add('active');
     }
 
     function openFengShuiSub(subTitle) {
         let subContent = "";
-        if (subTitle === 'Xem tuổi xây nhà') {
-            subContent = `
-                <h4 style="color:#152238;">Xem tuổi xây nhà</h4>
-                <input type="number" id="birthYear" placeholder="Năm sinh (Âm lịch)" style="width:100%; padding:10px; margin:8px 0; border:1px solid #d4af37;">
-                <button onclick="alert('Kết quả: Năm nay bạn không phạm Kim Lâu, Hoang Ốc. Có thể xây nhà.')" class="btn-apply-filter">KIỂM TRA</button>
-            `;
-        } 
-        else if (subTitle === 'Xem hướng nhà') {
-            subContent = `
-                <h4 style="color:#152238;">Xem hướng nhà theo mệnh</h4>
-                <select style="width:100%; padding:10px; margin:8px 0;"><option>Nam</option><option>Nữ</option></select>
-                <input type="number" placeholder="Năm sinh" style="width:100%; padding:10px; margin:8px 0; border:1px solid #d4af37;">
-                <button onclick="alert('Hướng tốt: Đông Nam (Sinh Khí), Nam (Diên Niên)')" class="btn-apply-filter">XEM HƯỚNG</button>
-            `;
-        }
-        else if (subTitle === 'Thước Lỗ Ban') {
-            subContent = `
-                <h4 style="color:#152238;">Thước Lỗ Ban trực tuyến</h4>
-                <input type="number" id="lobanVal" placeholder="Kích thước (cm)" style="width:100%; padding:10px; margin:8px 0; border:1px solid #d4af37;">
-                <button onclick="checkLoBan()" class="btn-apply-filter">TRA CUNG</button>
-                <div id="resLoBan" style="margin-top:10px;"></div>
-            `;
-        }
-        else if (subTitle === 'Xem ngày tốt') {
-            subContent = `
-                <h4 style="color:#152238;">Xem ngày đại cát</h4>
-                <input type="date" style="width:100%; padding:10px; margin:8px 0; border:1px solid #d4af37;">
-                <button onclick="alert('Ngày này là ngày Hoàng Đạo, rất tốt cho động thổ.')" class="btn-apply-filter">XEM NGÀY</button>
-            `;
-        }
-        else if (subTitle === 'Văn phòng') {
-            subContent = `<div style="font-size:13px; line-height:1.6;"><b>Phong thủy văn phòng:</b><br>- Bàn làm việc nên nhìn ra cửa.<br>- Tránh ngồi dưới xà ngang.<br>- Đặt thạch anh vàng để chiêu tài.</div>`;
-        }
-        else if (subTitle === 'Màu sơn') {
-            subContent = `<div style="font-size:13px; line-height:1.6;"><b>Màu sơn hợp mệnh:</b><br>- Mệnh Kim: Trắng, Ánh kim.<br>- Mệnh Mộc: Xanh lá.<br>- Mệnh Thủy: Xanh biển, Đen.<br>- Mệnh Hỏa: Đỏ, Tím.<br>- Mệnh Thổ: Vàng đất, Nâu.</div>`;
-        }
+        if (subTitle === 'Xem tuổi xây nhà') { subContent = `<h4 style="color:#152238;">Xem tuổi xây nhà</h4><input type="number" id="birthYear" placeholder="Năm sinh (Âm lịch)" style="width:100%; padding:10px; margin:8px 0; border:1px solid #d4af37;"><button onclick="alert('Kết quả: Năm nay bạn không phạm Kim Lâu, Hoang Ốc. Có thể xây nhà.')" class="btn-apply-filter">KIỂM TRA</button>`; } 
+        else if (subTitle === 'Xem hướng nhà') { subContent = `<h4 style="color:#152238;">Xem hướng nhà theo mệnh</h4><select style="width:100%; padding:10px; margin:8px 0;"><option>Nam</option><option>Nữ</option></select><input type="number" placeholder="Năm sinh" style="width:100%; padding:10px; margin:8px 0; border:1px solid #d4af37;"><button onclick="alert('Hướng tốt: Đông Nam (Sinh Khí), Nam (Diên Niên)')" class="btn-apply-filter">XEM HƯỚNG</button>`; }
+        else if (subTitle === 'Thước Lỗ Ban') { subContent = `<h4 style="color:#152238;">Thước Lỗ Ban trực tuyến</h4><input type="number" id="lobanVal" placeholder="Kích thước (cm)" style="width:100%; padding:10px; margin:8px 0; border:1px solid #d4af37;"><button onclick="checkLoBan()" class="btn-apply-filter">TRA CUNG</button><div id="resLoBan" style="margin-top:10px;"></div>`; }
+        else if (subTitle === 'Xem ngày tốt') { subContent = `<h4 style="color:#152238;">Xem ngày đại cát</h4><input type="date" style="width:100%; padding:10px; margin:8px 0; border:1px solid #d4af37;"><button onclick="alert('Ngày này là ngày Hoàng Đạo, rất tốt cho động thổ.')" class="btn-apply-filter">XEM NGÀY</button>`; }
+        else if (subTitle === 'Văn phòng') { subContent = `<div style="font-size:13px; line-height:1.6;"><b>Phong thủy văn phòng:</b><br>- Bàn làm việc nên nhìn ra cửa.<br>- Tránh ngồi dưới xà ngang.<br>- Đặt thạch anh vàng để chiêu tài.</div>`; }
+        else if (subTitle === 'Màu sơn') { subContent = `<div style="font-size:13px; line-height:1.6;"><b>Màu sơn hợp mệnh:</b><br>- Mệnh Kim: Trắng, Ánh kim.<br>- Mệnh Mộc: Xanh lá.<br>- Mệnh Thủy: Xanh biển, Đen.<br>- Mệnh Hỏa: Đỏ, Tím.<br>- Mệnh Thổ: Vàng đất, Nâu.</div>`; }
         document.getElementById('subFengShuiBody').innerHTML = subContent;
     }
 
     function checkLoBan() {
         const v = document.getElementById('lobanVal').value;
         if(!v) return;
-        document.getElementById('resLoBan').innerHTML = v % 10 > 5 ? 
-            `<span style="color:green"><b>Cung Tài:</b> Rất tốt cho cửa chính.</span>` : 
-            `<span style="color:red"><b>Cung Ly:</b> Không nên dùng cho nội thất.</span>`;
+        document.getElementById('resLoBan').innerHTML = v % 10 > 5 ? `<span style="color:green"><b>Cung Tài:</b> Rất tốt cho cửa chính.</span>` : `<span style="color:red"><b>Cung Ly:</b> Không nên dùng cho nội thất.</span>`;
     }
 
-    initData();
+    // --- KHỞI CHẠY ---
+    loadDataFromSupabase();
 </script>
 </body>
 </html>
