@@ -389,21 +389,34 @@
     }
 
     function openDetail(item) {
-        document.getElementById('panelTitle').innerText = "Chi tiết bất động sản";
-        document.getElementById('panelBody').innerHTML = `
-            <img src="${item.anh}" style="width:100%; border-radius:8px; margin-bottom:15px;">
-            <h3 style="color:var(--navy)">${item.ten}</h3>
-            <p><b>Mã SP:</b> ${item.id} | <b>Hướng:</b> ${item.huong}</p>
-            <p><b>Diện tích:</b> ${item.dienTich}m² | <b>Vị trí:</b> ${item.viTri}</p>
-            <p><b>Giá niêm yết:</b> <span style="color:red; font-weight:bold">${item.gia}</span></p>
-            <p>${item.mota || 'Không có mô tả.'}</p>
-            <div style="display:flex; gap:10px; margin-top:15px;">
-                <a href="tel:0354244883" style="flex:1; text-align:center; background:var(--navy); color:var(--gold); padding:12px; border-radius:5px; text-decoration:none; font-weight:bold; border:1px solid var(--gold);">GỌI ĐIỆN</a>
-                <button onclick="alert('Đã lưu tin!')" style="flex:1; background:white; color:var(--navy); border:1px solid var(--navy); border-radius:5px; font-weight:bold;">LƯU TIN</button>
-            </div>
-        `;
-        document.getElementById('side-panel').classList.add('active');
+    document.getElementById('panelTitle').innerText = "Chi tiết bất động sản";
+    
+    // Kiểm tra nếu có video thì tạo mã HTML cho video, nếu không thì để trống
+    let videoHTML = '';
+    if (item.video_url) {
+        // Nếu là link YouTube, ta dùng iframe. Nếu là link file trực tiếp, dùng thẻ <video>
+        if (item.video_url.includes('youtube.com') || item.video_url.includes('youtu.be')) {
+            const videoId = item.video_url.split('v=')[1] || item.video_url.split('/').pop();
+            videoHTML = `<iframe width="100%" height="200" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen style="border-radius:8px; margin-top:10px;"></iframe>`;
+        } else {
+            videoHTML = `<video width="100%" controls style="border-radius:8px; margin-top:10px;"><source src="${item.video_url}" type="video/mp4"></video>`;
+        }
     }
+
+    document.getElementById('panelBody').innerHTML = `
+        <img src="${item.anh}" style="width:100%; border-radius:8px; margin-bottom:15px;">
+        ${videoHTML} 
+        <h3 style="color:var(--navy)">${item.ten}</h3>
+        <p><b>Mã SP:</b> ${item.id} | <b>Hướng:</b> ${item.huong}</p>
+        <p><b>Diện tích:</b> ${item.dienTich}m² | <b>Vị trí:</b> ${item.viTri}</p>
+        <p><b>Giá niêm yết:</b> <span style="color:red; font-weight:bold">${item.gia}</span></p>
+        <p>${item.mota || 'Không có mô tả.'}</p>
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <a href="tel:0354244883" style="flex:1; text-align:center; background:var(--navy); color:var(--gold); padding:12px; border-radius:5px; text-decoration:none; font-weight:bold; border:1px solid var(--gold);">GỌI ĐIỆN</a>
+        </div>
+    `;
+    document.getElementById('side-panel').classList.add('active');
+}
 
     function toggleFavorite(event, element) {
         event.stopPropagation();
