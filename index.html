@@ -256,6 +256,7 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 <script>
+    // --- KHỞI TẠO BẢN ĐỒ ---
     const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri' });
     const streetLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', { subdomains: ['mt0', 'mt1', 'mt2', 'mt3'] });
 
@@ -276,33 +277,38 @@
         }
     }
 
-    // Biến toàn cục để lưu trữ dữ liệu từ API
+    // --- BIẾN TOÀN CỤC ---
     let bdsData = [];
     var clusters = L.markerClusterGroup();
     const listContainer = document.getElementById('listingItems');
 
-    // HÀM RÚT GỌN GIÁ TIỀN (MỚI BỔ SUNG)
+    // 1. HÀM RÚT GỌN GIÁ (Đã tối ưu để xóa .0 thừa)
     function formatMoney(amount) {
         if (!amount || isNaN(amount)) return "Liên hệ";
-        if (amount >= 1e9) return (amount / 1e9).toFixed(1).replace('.0', '') + ' tỷ';
-        if (amount >= 1e6) return (amount / 1e6).toFixed(1).replace('.0', '') + ' triệu';
-        return amount.toLocaleString() + ' đ';
+        let formatted = "";
+        if (amount >= 1e9) {
+            formatted = (amount / 1e9).toFixed(1).replace('.0', '') + ' tỷ';
+        } else if (amount >= 1e6) {
+            formatted = (amount / 1e6).toFixed(1).replace('.0', '') + ' triệu';
+        } else {
+            formatted = amount.toLocaleString() + ' đ';
+        }
+        return formatted;
     }
 
-    // Hàm khởi tạo và tải dữ liệu từ API
+    // 2. HÀM KHỞI TẠO DỮ LIỆU TỪ API
     async function initData() {
         try {
             const response = await fetch('/api/get-products');
             const data = await response.json();
 
-            // Chuyển đổi dữ liệu thô từ database sang format app sử dụng
             bdsData = data.map(item => ({
                 ...item,
                 toaDo: item.toa_do ? item.toa_do.split(',').map(num => parseFloat(num.trim())) : [10.012, 105.090],
                 ngayDangRaw: new Date(item.created_at),
                 ngayDang: new Date(item.created_at).toLocaleDateString('vi-VN'),
                 giaSo: item.gia_so, 
-                // TỰ ĐỘNG RÚT GỌN GIÁ DỰA TRÊN GIA_SO NẾU GIA_RUT_GON CHƯA CÓ
+                // QUAN TRỌNG: Tạo giá rút gọn ở đây để dùng chung
                 giaHienThi: formatMoney(item.gia_so),
                 dienTich: item.dien_tich,
                 viTri: item.vi_tri || 'Kiên Giang'
@@ -310,19 +316,20 @@
 
             renderData(bdsData);
         } catch (err) {
-            console.error("Lỗi tải dữ liệu thật:", err);
+            console.error("Lỗi tải dữ liệu:", err);
         }
     }
 
+    // 3. HÀM HIỂN THỊ DỮ LIỆU
     function renderData(dataList) {
         clusters.clearLayers();
         listContainer.innerHTML = '';
         const sortedData = [...dataList].sort((a, b) => b.ngayDangRaw - a.ngayDangRaw);
 
         sortedData.forEach(item => {
+            // SỬA TẠI ĐÂY: Hiển thị giá rút gọn trên Pin bản đồ
             const icon = L.divIcon({
                 className: 'custom-pin',
-                // SỬ DỤNG giaHienThi ĐÃ RÚT GỌN Ở ĐÂY
                 html: `<div class="price-pin"><div class="pin-label">${item.giaHienThi}</div><div class="pin-drop"></div></div>`,
                 iconSize: [40, 40], iconAnchor: [20, 40]
             });
@@ -331,6 +338,7 @@
 
             const card = document.createElement('div');
             card.className = 'product-card';
+            // SỬA TẠI ĐÂY: Hiển thị giá rút gọn trong danh sách
             card.innerHTML = `
                 <img src="${item.anh}" alt="thumb">
                 <div class="product-info">
@@ -354,6 +362,7 @@
         map.addLayer(clusters);
     }
 
+    // 4. CÁC HÀM BỔ TRỢ PANEL & FILTER
     function toggleFilterPanel() { document.getElementById('filterPanel').classList.toggle('active'); }
 
     function executeSearch() {
@@ -444,6 +453,7 @@
         document.getElementById('side-panel').classList.add('active');
     }
 
+    // CHẠY KHỞI TẠO
     initData();
 </script>
 </body>
