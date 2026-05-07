@@ -281,6 +281,14 @@
     var clusters = L.markerClusterGroup();
     const listContainer = document.getElementById('listingItems');
 
+    // HÀM RÚT GỌN GIÁ TIỀN (MỚI BỔ SUNG)
+    function formatMoney(amount) {
+        if (!amount || isNaN(amount)) return "Liên hệ";
+        if (amount >= 1e9) return (amount / 1e9).toFixed(1).replace('.0', '') + ' tỷ';
+        if (amount >= 1e6) return (amount / 1e6).toFixed(1).replace('.0', '') + ' triệu';
+        return amount.toLocaleString() + ' đ';
+    }
+
     // Hàm khởi tạo và tải dữ liệu từ API
     async function initData() {
         try {
@@ -290,11 +298,12 @@
             // Chuyển đổi dữ liệu thô từ database sang format app sử dụng
             bdsData = data.map(item => ({
                 ...item,
-                // Chuyển "10.012, 105.090" thành mảng số [10.012, 105.090]
                 toaDo: item.toa_do ? item.toa_do.split(',').map(num => parseFloat(num.trim())) : [10.012, 105.090],
                 ngayDangRaw: new Date(item.created_at),
                 ngayDang: new Date(item.created_at).toLocaleDateString('vi-VN'),
-                giaSo: item.gia_so, // Giữ số để lọc
+                giaSo: item.gia_so, 
+                // TỰ ĐỘNG RÚT GỌN GIÁ DỰA TRÊN GIA_SO NẾU GIA_RUT_GON CHƯA CÓ
+                giaHienThi: formatMoney(item.gia_so),
                 dienTich: item.dien_tich,
                 viTri: item.vi_tri || 'Kiên Giang'
             }));
@@ -313,7 +322,8 @@
         sortedData.forEach(item => {
             const icon = L.divIcon({
                 className: 'custom-pin',
-                html: `<div class="price-pin"><div class="pin-label">${item.gia}</div><div class="pin-drop"></div></div>`,
+                // SỬ DỤNG giaHienThi ĐÃ RÚT GỌN Ở ĐÂY
+                html: `<div class="price-pin"><div class="pin-label">${item.giaHienThi}</div><div class="pin-drop"></div></div>`,
                 iconSize: [40, 40], iconAnchor: [20, 40]
             });
             const marker = L.marker(item.toaDo, { icon: icon }).on('click', () => openDetail(item));
@@ -326,7 +336,7 @@
                 <div class="product-info">
                     <h4>${item.ten}</h4>
                     <p>Mã: ${item.id} | <b>${item.viTri}</b></p>
-                    <div class="price-tag">${item.gia} - ${item.dienTich}m²</div>
+                    <div class="price-tag">${item.giaHienThi} - ${item.dienTich}m²</div>
                     <div class="product-meta">
                         <span><i class="fa fa-calendar"></i> ${item.ngayDang}</span>
                         <span><i class="fa fa-eye"></i> ${item.luotXem || 0}</span>
@@ -370,14 +380,19 @@
                 const p = item.giaSo;
                 if (priceVal === "under-500") matchPrice = p < 500000000;
                 else if (priceVal === "500-1000") matchPrice = p >= 500000000 && p <= 1000000000;
-                // Lưu ý: Bạn cần điều chỉnh logic so sánh p (giá số) tùy theo đơn vị trong database (VND hay Tỷ)
+                else if (priceVal === "1000-2000") matchPrice = p >= 1000000000 && p <= 2000000000;
+                else if (priceVal === "2000-3000") matchPrice = p >= 2000000000 && p <= 3000000000;
+                else if (priceVal === "3000-5000") matchPrice = p >= 3000000000 && p <= 5000000000;
+                else if (priceVal === "5000-10000") matchPrice = p >= 5000000000 && p <= 10000000000;
+                else if (priceVal === "above-20000") matchPrice = p > 20000000000;
             }
             let matchArea = true;
             if (areaVal !== "") {
                 const a = item.dienTich;
                 if (areaVal === "under-50") matchArea = a < 50;
                 else if (areaVal === "50-100") matchArea = a >= 50 && a <= 100;
-                else if (areaVal === "above-200") matchArea = a > 200;
+                else if (areaVal === "100-200") matchArea = a >= 100 && a <= 200;
+                else if (areaVal === "above-1000") matchArea = a > 1000;
             }
             const matchDirection = directionVal === "" || item.huong === directionVal;
             return matchType && matchPrice && matchArea && matchDirection;
@@ -389,34 +404,32 @@
     }
 
     function openDetail(item) {
-    document.getElementById('panelTitle').innerText = "Chi tiết bất động sản";
-    
-    // Kiểm tra nếu có video thì tạo mã HTML cho video, nếu không thì để trống
-    let videoHTML = '';
-    if (item.video_url) {
-        // Nếu là link YouTube, ta dùng iframe. Nếu là link file trực tiếp, dùng thẻ <video>
-        if (item.video_url.includes('youtube.com') || item.video_url.includes('youtu.be')) {
-            const videoId = item.video_url.split('v=')[1] || item.video_url.split('/').pop();
-            videoHTML = `<iframe width="100%" height="200" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen style="border-radius:8px; margin-top:10px;"></iframe>`;
-        } else {
-            videoHTML = `<video width="100%" controls style="border-radius:8px; margin-top:10px;"><source src="${item.video_url}" type="video/mp4"></video>`;
+        document.getElementById('panelTitle').innerText = "Chi tiết bất động sản";
+        
+        let videoHTML = '';
+        if (item.video_url) {
+            if (item.video_url.includes('youtube.com') || item.video_url.includes('youtu.be')) {
+                const videoId = item.video_url.split('v=')[1] || item.video_url.split('/').pop();
+                videoHTML = `<iframe width="100%" height="200" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen style="border-radius:8px; margin-top:10px;"></iframe>`;
+            } else {
+                videoHTML = `<video width="100%" controls style="border-radius:8px; margin-top:10px;"><source src="${item.video_url}" type="video/mp4"></video>`;
+            }
         }
-    }
 
-    document.getElementById('panelBody').innerHTML = `
-        <img src="${item.anh}" style="width:100%; border-radius:8px; margin-bottom:15px;">
-        ${videoHTML} 
-        <h3 style="color:var(--navy)">${item.ten}</h3>
-        <p><b>Mã SP:</b> ${item.id} | <b>Hướng:</b> ${item.huong}</p>
-        <p><b>Diện tích:</b> ${item.dienTich}m² | <b>Vị trí:</b> ${item.viTri}</p>
-        <p><b>Giá niêm yết:</b> <span style="color:red; font-weight:bold">${item.gia}</span></p>
-        <p>${item.mota || 'Không có mô tả.'}</p>
-        <div style="display:flex; gap:10px; margin-top:15px;">
-            <a href="tel:0354244883" style="flex:1; text-align:center; background:var(--navy); color:var(--gold); padding:12px; border-radius:5px; text-decoration:none; font-weight:bold; border:1px solid var(--gold);">GỌI ĐIỆN</a>
-        </div>
-    `;
-    document.getElementById('side-panel').classList.add('active');
-}
+        document.getElementById('panelBody').innerHTML = `
+            <img src="${item.anh}" style="width:100%; border-radius:8px; margin-bottom:15px;">
+            ${videoHTML} 
+            <h3 style="color:var(--navy)">${item.ten}</h3>
+            <p><b>Mã SP:</b> ${item.id} | <b>Hướng:</b> ${item.huong}</p>
+            <p><b>Diện tích:</b> ${item.dienTich}m² | <b>Vị trí:</b> ${item.viTri}</p>
+            <p><b>Giá niêm yết:</b> <span style="color:red; font-weight:bold">${item.giaHienThi}</span></p>
+            <p>${item.mota || 'Không có mô tả.'}</p>
+            <div style="display:flex; gap:10px; margin-top:15px;">
+                <a href="tel:0354244883" style="flex:1; text-align:center; background:var(--navy); color:var(--gold); padding:12px; border-radius:5px; text-decoration:none; font-weight:bold; border:1px solid var(--gold);">GỌI ĐIỆN</a>
+            </div>
+        `;
+        document.getElementById('side-panel').classList.add('active');
+    }
 
     function toggleFavorite(event, element) {
         event.stopPropagation();
@@ -431,7 +444,6 @@
         document.getElementById('side-panel').classList.add('active');
     }
 
-    // Chạy tải dữ liệu khi trang web load
     initData();
 </script>
 </body>
